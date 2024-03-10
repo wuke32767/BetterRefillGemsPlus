@@ -40,6 +40,11 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             var spriteGetter = ReflectionHandler.GetGetter<Sprite>(entity, spriteName);
             var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
+            if(spriteGetter is null||oneuseGetter is null)
+            {
+                Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
+                return;
+            }
             EntityImageHandler.Registered[entity].Add(e =>
             {
                 if (oneuseGetter(e))
@@ -96,6 +101,12 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             var imageGetter = ReflectionHandler.GetGetter<Image>(entity, imageName);
             var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
+            if (imageGetter is null || oneuseGetter is null)
+            {
+                Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
+                return;
+            }
+
             EntityImageHandler.Registered[entity].Add(e =>
             {
                 if (oneuseGetter(e))
