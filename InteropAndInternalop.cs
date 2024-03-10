@@ -40,7 +40,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             var spriteGetter = ReflectionHandler.GetGetter<Sprite>(entity, spriteName);
             var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
-            if(spriteGetter is null||oneuseGetter is null)
+            if (spriteGetter is null || oneuseGetter is null)
             {
                 Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
                 return;
@@ -62,7 +62,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
             {
-                if(!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
+                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
                 {
                     oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
                 }
@@ -81,7 +81,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
             {
-                if(!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
+                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
                 {
                     oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
                 }
@@ -147,20 +147,56 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         /// </summary>
         /// <param name="entity">holds a value of one of (Type, string). type and fullName are functionally the same, one is Type and the other is Type from reflection.</param>
         /// <param name="as">same as entity</param>
-        public static void RegisterAs((Type? type,string? fullName) entity, (Type? type, string? fullName) @as)
+        public static void RegisterAs((Type? type, string? fullName) entity, (Type? type, string? fullName) @as)
         {
-            List<Action<Entity>> to;
-            if(@as.type is null)
+            if (entity.type is null && entity.fullName is null)
             {
-                to = EntityImageHandler.RegisteredRefl[@as.fullName];
+                throw new ArgumentNullException(nameof(entity), $"One of type and fullName should not be null.");
+            }
+            if (@as.type is null && @as.fullName is null)
+            {
+                throw new ArgumentNullException(nameof(@as), $"One of type and fullName should not be null.");
+            }
+            List<Action<Entity>> to;
+            if (@as.type is null)
+            {
+                if (EntityImageHandler.RegisteredRefl.TryGetValue(@as.fullName, out var list))
+                {
+                    to = list;
+                }
+                else
+                {
+                    var r = EntityImageHandler.Registered
+                        .Concat(EntityImageHandler.RegisteredSafe)
+                        .FirstOrDefault(x => x.Key.FullName == @as.fullName);
+                    if (r.Key is not null)
+                    {
+                        to = r.Value;
+                    }
+                    else
+                    {
+                        Logger.Log(nameof(BetterRefillGemsPlus), $"No type called {@as.fullName} was registered.");
+                        return;
+                    }
+                }
             }
             else
             {
-                to = EntityImageHandler.Registered[@as.type];
+                if (EntityImageHandler.RegisteredRefl.TryGetValue(@as.type.FullName, out var list)
+                    || EntityImageHandler.Registered.TryGetValue(@as.type, out list)
+                    || EntityImageHandler.RegisteredSafe.TryGetValue(@as.type, out list))
+                {
+                    to = list;
+                }
+                else
+                {
+                    Logger.Log(nameof(BetterRefillGemsPlus), $"No type called {@as.type.FullName} was registered.");
+                    return;
+                }
             }
 
             // better to create a clone, or it will be annoying.
-            if(entity.type is null)
+            if (entity.type is null)
             {
                 EntityImageHandler.RegisteredRefl[entity.fullName] = new(to);
             }
@@ -168,7 +204,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             {
                 EntityImageHandler.Registered[entity.type] = new(to);
             }
-            
+
         }
     }
 }
