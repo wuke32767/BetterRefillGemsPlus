@@ -2,6 +2,7 @@
 using Monocle;
 using MonoMod.Cil;
 using MonoMod.ModInterop;
+using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
         public override Type SettingsType => typeof(BetterRefillGemsPlusModuleSettings);
         public static BetterRefillGemsPlusModuleSettings Settings => (BetterRefillGemsPlusModuleSettings)Instance._Settings;
-        public static Atlas all=new();
+        public static Atlas all = new();
         public override Type SessionType => typeof(BetterRefillGemsPlusModuleSession);
         public static BetterRefillGemsPlusModuleSession Session => (BetterRefillGemsPlusModuleSession)Instance._Session;
         public override void PrepareMapDataProcessors(MapDataFixup context)
@@ -51,10 +52,24 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             // TODO: apply any hooks that should always be active
             On.Monocle.Entity.Awake += Entity_Awake;
-            IL.Monocle.VirtualTexture.Load += VirtualTexture_Load;
+            //IL.Monocle.VirtualTexture.Load += VirtualTexture_Load;
+            var load = typeof(VirtualTexture).GetProperty("LoadImmediately", ReflectionHandler.bf).GetMethod;
+            if (load != null)
+            {
+                VTex_LoadImm = new Hook(load, (Func<VirtualTexture, bool> orig, VirtualTexture self) =>
+                {
+                    var r = orig(self);
+                    if (GetProcess())
+                    {
+                        return true;
+                    }
+                    return r;
+                });
+            }
             EntityImageHandler.Load();
             typeof(InteropAndInternalop).ModInterop();
         }
+        Hook? VTex_LoadImm;
         //should be safe if it's applied for multiple times.
         private void VirtualTexture_Load(ILContext il)
         {
@@ -87,8 +102,8 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         public override void Unload()
         {
             On.Monocle.Entity.Awake -= Entity_Awake;
-            IL.Monocle.VirtualTexture.Load -= VirtualTexture_Load;
-
+            //IL.Monocle.VirtualTexture.Load -= VirtualTexture_Load;
+            VTex_LoadImm?.Dispose();
             // TODO: unapply any hooks applied in Load()
         }
     }
