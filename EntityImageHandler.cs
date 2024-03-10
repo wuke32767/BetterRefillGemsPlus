@@ -40,7 +40,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             RegisterSpriteReflectionReflection("Celeste.Mod.ArphimigonHelper.DifficultRefill", "sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("Celeste.Mod.CommunalHelper.Entities.ShieldedRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.CommunalHelper.Entities.ShieldedRefill", "sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("FrostHelper.PlusOneRefill", "sprite", "oneUse");
             //RegisterSpriteReflectionReflection("FrostHelper.HeldRefill", "Sprite", "oneUse");
