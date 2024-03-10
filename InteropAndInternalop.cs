@@ -142,6 +142,8 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         /// <code>RegisterAs((typeof(ColorfulRefill), null), (typeof(Refill), null));</code>
         /// reflection:
         /// <code>RegisterAs((null, "Celeste.Mod.DJMapHelper.Entities.ColorfulRefill"), (typeof(Refill), null));</code>
+        /// 
+        /// something was changed. you should register target type before register smth as it.
         /// </summary>
         /// <param name="entity">holds a value of one of (Type, string). type and fullName are functionally the same, one is Type and the other is Type from reflection.</param>
         /// <param name="as">same as entity</param>
@@ -157,13 +159,14 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 to = EntityImageHandler.Registered[@as.type];
             }
 
+            // better to create a clone, or it will be annoying.
             if(entity.type is null)
             {
-                EntityImageHandler.RegisteredRefl[entity.fullName] = to;
+                EntityImageHandler.RegisteredRefl[entity.fullName] = new(to);
             }
             else
             {
-                EntityImageHandler.Registered[entity.type] = to;
+                EntityImageHandler.Registered[entity.type] = new(to);
             }
             
         }

@@ -10,8 +10,9 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 {
     static class EntityImageHandler
     {
-       public static Dictionary<Type, Func<Entity, bool>> oneuser = [];
+        public static Dictionary<Type, Func<Entity, bool>> oneuser = [];
         public static CacheDictionary<Type, List<Action<Entity>>> Registered = new(x => []);
+        public static CacheDictionary<Type, List<Action<Entity>>> RegisteredSafe = new(x => []);
         public static CacheDictionary<string, List<Action<Entity>>> RegisteredRefl = new(x => []);
         internal static void Load()
         {
@@ -24,10 +25,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
             RegisterAs((null, "Celeste.Mod.CommunalHelper.DashStates.DreamTunnelRefill"), (typeof(Refill), null));
             RegisterAs((null, "Celeste.Mod.CommunalHelper.DashStates.SeekerDashRefill"), (typeof(Refill), null));
-            RegisterAs((null,"Celeste.Mod.CommunalHelper.Entities.StrawberryJam.ExpiringDashRefill" ), (typeof(Refill), null));
+            RegisterAs((null, "Celeste.Mod.CommunalHelper.Entities.StrawberryJam.ExpiringDashRefill"), (typeof(Refill), null));
 
-            RegisterAs((null,"ExtendedVariants.Entities.ForMappers.JumpRefill"), (typeof(Refill), null));
-            
+            RegisterAs((null, "ExtendedVariants.Entities.ForMappers.JumpRefill"), (typeof(Refill), null));
+
             RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.CoreRefill", "sprite", "oneUse");
             RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.CloudRefill", "sprite", "oneUse");
             RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.BoosterRefill", "sprite", "oneUse");
@@ -81,19 +82,54 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         public static void CheckAndReplaceSprite(Entity e)
         {
             Type ety = e.GetType();
-            if (Registered.TryGetValue(e.GetType(), out var func))
+            if (RegisteredSafe.TryGetValue(e.GetType(), out var func))
             {
-                foreach(var f in func)
+                foreach (var f in func)
                 {
                     f(e);
                 }
             }
-            if(RegisteredRefl.TryGetValue(e.GetType().FullName,out func))
+            if (Registered.Remove(e.GetType(), out func))
             {
-                foreach(var f in func)
+                List<Action<Entity>> exc = [];
+                foreach (var f in func)
                 {
-                    f(e);
+                    try
+                    {
+                        f(e);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log(nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {e.GetType().FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
+                        exc.Add(f);
+                    }
                 }
+                foreach (var f in exc)
+                {
+                    func.Remove(f);
+                }
+                RegisteredSafe[e.GetType()] = func;
+            }
+            if (RegisteredRefl.Remove(e.GetType().FullName, out func))
+            {
+                List<Action<Entity>> exc = [];
+                foreach (var f in func)
+                {
+                    try
+                    {
+                        f(e);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log(nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {e.GetType().FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
+                        exc.Add(f);
+                    }
+                }
+                foreach (var f in exc)
+                {
+                    func.Remove(f);
+                }
+                RegisteredSafe[e.GetType()] = func;
             }
         }
         public static void ReplaceSprite(Entity e)
