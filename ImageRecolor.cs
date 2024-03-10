@@ -19,12 +19,14 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             var rect = mtex.ClipRect;
             var fmt = orig.Format;
             //var sin = stackalloc byte[16];
+            BetterRefillGemsPlusModule.loadimmediately.TryAdd(Environment.CurrentManagedThreadId, null);
             var nvtex = new VirtualTexture(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), rect.Width, rect.Height, Color.Transparent);
+            BetterRefillGemsPlusModule.loadimmediately.TryRemove(Environment.CurrentManagedThreadId, out _);
             bool outrange(int v1, int v2)
             {
                 return !(v1 >= 0 && v1 < rect.Width && v2 < rect.Height && v2 >= 0);
             }
-            void calcTyped<T>(T sin, T transparent) where T:struct
+            void calcTyped<T>(T sin, T transparent) where T : struct
             {
                 T[] b = new T[1 * rect.Width * rect.Height];
                 orig.GetData(0, rect, b, 0, b.Length);
@@ -52,8 +54,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 }
                 nvtex.Texture_Safe.SetData(b);
             }
-            void calc(byte[] sin, byte[] transparent)
+            void calcBigEndian(byte[] sin, byte[] transparent)
             {
+                sin = sin.Reverse().ToArray();
+                transparent = transparent.Reverse().ToArray();
                 var size = sin.Length;
                 byte[] b = new byte[size * rect.Width * rect.Height];
                 orig.GetData(0, rect, b, 0, b.Length);
@@ -82,7 +86,12 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 nvtex.Texture_Safe.SetData(b);
             }
             Color col = new(255, 41, 41, 255);
-            Color trans = new(0, 0, 0, 0); 
+            Color trans = new(0, 0, 0, 0);
+            if (fmt!=Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color)
+            {
+                Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), "Looks loke you have found a image in different format. Send it to me so I could add support for it.\n"
+                    + $"Metxture:{mtex.Atlas.DataPath} {mtex.AtlasPath}");
+            }
             switch (fmt)
             {
                 case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color:
@@ -94,15 +103,16 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                         calcTyped(col.ToVector4(), trans.ToVector4());
                     }
                     break;
-                //todo: omg they're all big endian
+                //omg they're all big endian
+                //oh, just reverse them in func
                 case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Bgra4444:
-                    calc([0, 255], [0, 0]);
+                    calcBigEndian([0, 255], [0, 0]);
                     break;
                 case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Bgra5551:
-                    calc([0, 63], [0, 0]);
+                    calcBigEndian([0, 63], [0, 0]);
                     break;
                 case Microsoft.Xna.Framework.Graphics.SurfaceFormat.ColorBgraEXT:
-                    calc([0, 0, 255, 255], [0, 0, 0, 0]);
+                    calcBigEndian([0, 0, 255, 255], [0, 0, 0, 0]);
                     break;
                 //case Microsoft.Xna.Framework.Graphics.SurfaceFormat.ColorSrgbEXT:
                 //    //What's this?
@@ -112,13 +122,13 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     var ohb = BitConverter.GetBytes(oh);
                     var zh = BitConverter.HalfToUInt16Bits((Half)0.0);
                     var zhb = BitConverter.GetBytes(zh);
-                    calc([.. ohb, .. ohb, .. zhb, .. zhb], [.. zhb, .. zhb, .. zhb, .. zhb,]);
+                    calcBigEndian([.. ohb, .. ohb, .. zhb, .. zhb], [.. zhb, .. zhb, .. zhb, .. zhb,]);
                     break;
                 case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Rgba1010102:
-                    calc([0, 0, 15, 255], [0, 0, 0, 0,]);
+                    calcBigEndian([0, 0, 15, 255], [0, 0, 0, 0,]);
                     break;
                 case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Rgba64:
-                    calc([255, 255, 0, 0, 0, 0, 255, 255], [0, 0, 0, 0, 0, 0, 0, 0,]);
+                    calcBigEndian([255, 255, 0, 0, 0, 0, 255, 255], [0, 0, 0, 0, 0, 0, 0, 0,]);
                     break;
                 default:
                     Logger.Log(LogLevel.Warn, nameof(BetterRefillGemsPlus), $"failed when loading {mtex.Atlas.DataPath} {mtex.AtlasPath} . unsupported surface format {fmt}.");
@@ -126,13 +136,13 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             }
             return new MTexture(nvtex)
             {
-                Atlas=mtex.Atlas,
-                AtlasPath=mtex.AtlasPath,
-                Center=mtex.Center,
+                Atlas = mtex.Atlas,
+                AtlasPath = mtex.AtlasPath,
+                Center = mtex.Center,
                 //BottomUV=mtex.BottomUV,
-                DrawOffset=mtex.DrawOffset,
+                DrawOffset = mtex.DrawOffset,
                 //LeftUV=mtex.LeftUV,
-                
+
             };
         }
 

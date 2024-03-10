@@ -134,9 +134,9 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         /// </summary>
         /// <param name="entity">holds a value of one of (Type, string). type and fullName are functionally the same, one is Type and the other is Type from reflection.</param>
         /// <param name="as">same as entity</param>
-        public static void RegisterAs((Type type,string fullName) entity, (Type type, string fullName) @as)
+        public static void RegisterAs((Type? type,string? fullName) entity, (Type? type, string? fullName) @as)
         {
-            List<Action<Entity>> to = null;
+            List<Action<Entity>> to;
             if(@as.type is null)
             {
                 to = EntityImageHandler.RegisteredRefl[@as.fullName];

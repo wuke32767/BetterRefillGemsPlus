@@ -26,6 +26,8 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             RegisterAs((null, "Celeste.Mod.CommunalHelper.DashStates.SeekerDashRefill"), (typeof(Refill), null));
             RegisterAs((null,"Celeste.Mod.CommunalHelper.Entities.StrawberryJam.ExpiringDashRefill" ), (typeof(Refill), null));
 
+            RegisterAs((null,"ExtendedVariants.Entities.ForMappers.JumpRefill"), (typeof(Refill), null));
+            
             RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.CoreRefill", "sprite", "oneUse");
             RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.CloudRefill", "sprite", "oneUse");
             RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.BoosterRefill", "sprite", "oneUse");
@@ -40,6 +42,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             RegisterSpriteReflectionReflection("Celeste.Mod.CommunalHelper.Entities.ShieldedRefill", "sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("FrostHelper.PlusOneRefill", "sprite", "oneUse");
+            //RegisterSpriteReflectionReflection("FrostHelper.HeldRefill", "Sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.CryoRefill", "sprite", "oneUse");
             RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.GrappleRefill", "sprite", "oneUse");
@@ -70,9 +73,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             RegisterSpriteReflectionReflection("Celeste.Mod.SaladimHelper.Entities.BitsMomentumRefill", "sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("Celeste.Mod.XaphanHelper.Entities.TimerRefill", "sprite", "oneUse");
-
-            //RegisterSpriteReflectionReflection("ExtendedVariants.Entities.ForMappers.JumpRefill", "sprite", "oneUse");
-
 
         }
 
@@ -123,6 +123,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     frame = ImageRecolor.GetImage(frame);
                 }
             }
+            ReplaceImage(sprite);
         }
         public static void ReplaceImage(Entity e)
         {
