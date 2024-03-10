@@ -15,135 +15,147 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         static Dictionary<(Atlas, string), MTexture> resultcomplete = [];
         public static MTexture MTextureDrawOutline(MTexture mtex)
         {
-            var orig = mtex.Texture.Texture_Safe;
-            var rect = mtex.ClipRect;
-            var fmt = orig.Format;
-            //var sin = stackalloc byte[16];
-            BetterRefillGemsPlusModule.loadimmediately.TryAdd(Environment.CurrentManagedThreadId, null);
-            var nvtex = new VirtualTexture(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), rect.Width, rect.Height, Color.Transparent);
-            BetterRefillGemsPlusModule.loadimmediately.TryRemove(Environment.CurrentManagedThreadId, out _);
-            bool outrange(int v1, int v2)
+            try
             {
-                return !(v1 >= 0 && v1 < rect.Width && v2 < rect.Height && v2 >= 0);
-            }
-            void calcTyped<T>(T sin, T transparent) where T : struct
-            {
-                T[] b = new T[1 * rect.Width * rect.Height];
-                orig.GetData(0, rect, b, 0, b.Length);
-                for (int i = 0; i < rect.Height; i++)
+                var orig = mtex.Texture.Texture_Safe;
+                var rect = mtex.ClipRect;
+                var fmt = orig.Format;
+                //var sin = stackalloc byte[16];
+                BetterRefillGemsPlusModule.loadimmediately.TryAdd(Environment.CurrentManagedThreadId, null);
+                var nvtex = new VirtualTexture(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), rect.Width, rect.Height, Color.Transparent);
+                bool outrange(int v1, int v2)
                 {
-                    for (int j = 0; j < rect.Width; j++)
+                    return !(v1 >= 0 && v1 < rect.Width && v2 < rect.Height && v2 >= 0);
+                }
+                void calcTyped<T>(T sin, T transparent) where T : struct
+                {
+                    T[] b = new T[1 * rect.Width * rect.Height];
+                    orig.GetData(0, rect, b, 0, b.Length);
+                    for (int i = 0; i < rect.Height; i++)
                     {
-                        if (!transparent.Equals(b[((i * rect.Width + j) * 1)]))
+                        for (int j = 0; j < rect.Width; j++)
                         {
-                            if
-                            (
-                                (outrange(i + 1, j) || transparent.Equals(b[(((i + 1) * rect.Width + j) * 1)])) ||
-                                (outrange(i, j - 1) || transparent.Equals(b[(((i) * rect.Width + j - 1) * 1)])) ||
-                                (outrange(i - 1, j) || transparent.Equals(b[(((i - 1) * rect.Width + j) * 1)])) ||
-                                (outrange(i, j + 1) || transparent.Equals(b[(((i) * rect.Width + j + 1) * 1)]))
-                            )
+                            if (!transparent.Equals(b[((i * rect.Width + j) * 1)]))
                             {
-                                int k = 0;
+                                if
+                                (
+                                    (outrange(i + 1, j) || transparent.Equals(b[(((i + 1) * rect.Width + j) * 1)])) ||
+                                    (outrange(i, j - 1) || transparent.Equals(b[(((i) * rect.Width + j - 1) * 1)])) ||
+                                    (outrange(i - 1, j) || transparent.Equals(b[(((i - 1) * rect.Width + j) * 1)])) ||
+                                    (outrange(i, j + 1) || transparent.Equals(b[(((i) * rect.Width + j + 1) * 1)]))
+                                )
                                 {
-                                    b[(i * rect.Width + j) * 1 + k] = sin;
+                                    int k = 0;
+                                    {
+                                        b[(i * rect.Width + j) * 1 + k] = sin;
+                                    }
                                 }
                             }
                         }
                     }
+                    nvtex.Texture_Safe.SetData(b);
                 }
-                nvtex.Texture_Safe.SetData(b);
-            }
-            void calcBigEndian(byte[] sin, byte[] transparent)
-            {
-                sin = sin.Reverse().ToArray();
-                transparent = transparent.Reverse().ToArray();
-                var size = sin.Length;
-                byte[] b = new byte[size * rect.Width * rect.Height];
-                orig.GetData(0, rect, b, 0, b.Length);
-                for (int i = 0; i < rect.Height; i++)
+                void calcBigEndian(byte[] sin, byte[] transparent)
                 {
-                    for (int j = 0; j < rect.Width; j++)
+                    sin = sin.Reverse().ToArray();
+                    transparent = transparent.Reverse().ToArray();
+                    var size = sin.Length;
+                    byte[] b = new byte[size * rect.Width * rect.Height];
+                    orig.GetData(0, rect, b, 0, b.Length);
+                    for (int i = 0; i < rect.Height; i++)
                     {
-                        if (!transparent.SequenceEqual(b.Skip((i * rect.Width + j) * size).Take(size)))
+                        for (int j = 0; j < rect.Width; j++)
                         {
-                            if
-                            (//trust jit.
-                                (outrange(i + 1, j) || transparent.SequenceEqual(b.Skip(((i + 1) * rect.Width + j) * size).Take(size))) ||
-                                (outrange(i, j - 1) || transparent.SequenceEqual(b.Skip(((i) * rect.Width + j - 1) * size).Take(size))) ||
-                                (outrange(i - 1, j) || transparent.SequenceEqual(b.Skip(((i - 1) * rect.Width + j) * size).Take(size))) ||
-                                (outrange(i, j + 1) || transparent.SequenceEqual(b.Skip(((i) * rect.Width + j + 1) * size).Take(size)))
-                            )
+                            if (!transparent.SequenceEqual(b.Skip((i * rect.Width + j) * size).Take(size)))
                             {
-                                for (int k = 0; k < size; k++)
+                                if
+                                (//trust jit.
+                                    (outrange(i + 1, j) || transparent.SequenceEqual(b.Skip(((i + 1) * rect.Width + j) * size).Take(size))) ||
+                                    (outrange(i, j - 1) || transparent.SequenceEqual(b.Skip(((i) * rect.Width + j - 1) * size).Take(size))) ||
+                                    (outrange(i - 1, j) || transparent.SequenceEqual(b.Skip(((i - 1) * rect.Width + j) * size).Take(size))) ||
+                                    (outrange(i, j + 1) || transparent.SequenceEqual(b.Skip(((i) * rect.Width + j + 1) * size).Take(size)))
+                                )
                                 {
-                                    b[(i * rect.Width + j) * size + k] = sin[k];
+                                    for (int k = 0; k < size; k++)
+                                    {
+                                        b[(i * rect.Width + j) * size + k] = sin[k];
+                                    }
                                 }
                             }
                         }
                     }
+                    nvtex.Texture_Safe.SetData(b);
                 }
-                nvtex.Texture_Safe.SetData(b);
-            }
-            Color col = new(255, 41, 41, 255);
-            Color trans = new(0, 0, 0, 0);
-            if (fmt!=Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color)
-            {
-                Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), "Looks loke you have found a image in different format. Send it to me so I could add support for it.\n"
-                    + $"Metxture:{mtex.Atlas.DataPath} {mtex.AtlasPath}");
-            }
-            switch (fmt)
-            {
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color:
-                    calcTyped(col, trans);
-                    break;
-                //todo: I don't have image in below format.
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Vector4:
-                    {
-                        calcTyped(col.ToVector4(), trans.ToVector4());
-                    }
-                    break;
-                //omg they're all big endian
-                //oh, just reverse them in func
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Bgra4444:
-                    calcBigEndian([0, 255], [0, 0]);
-                    break;
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Bgra5551:
-                    calcBigEndian([0, 63], [0, 0]);
-                    break;
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.ColorBgraEXT:
-                    calcBigEndian([0, 0, 255, 255], [0, 0, 0, 0]);
-                    break;
-                //case Microsoft.Xna.Framework.Graphics.SurfaceFormat.ColorSrgbEXT:
-                //    //What's this?
-                //    break;
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.HalfVector4:
-                    var oh = BitConverter.HalfToUInt16Bits((Half)1.0);
-                    var ohb = BitConverter.GetBytes(oh);
-                    var zh = BitConverter.HalfToUInt16Bits((Half)0.0);
-                    var zhb = BitConverter.GetBytes(zh);
-                    calcBigEndian([.. ohb, .. ohb, .. zhb, .. zhb], [.. zhb, .. zhb, .. zhb, .. zhb,]);
-                    break;
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Rgba1010102:
-                    calcBigEndian([0, 0, 15, 255], [0, 0, 0, 0,]);
-                    break;
-                case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Rgba64:
-                    calcBigEndian([255, 255, 0, 0, 0, 0, 255, 255], [0, 0, 0, 0, 0, 0, 0, 0,]);
-                    break;
-                default:
-                    Logger.Log(LogLevel.Warn, nameof(BetterRefillGemsPlus), $"failed when loading {mtex.Atlas.DataPath} {mtex.AtlasPath} . unsupported surface format {fmt}.");
-                    return mtex;
-            }
-            return new MTexture(nvtex)
-            {
-                Atlas = mtex.Atlas,
-                AtlasPath = mtex.AtlasPath,
-                Center = mtex.Center,
-                //BottomUV=mtex.BottomUV,
-                DrawOffset = mtex.DrawOffset,
-                //LeftUV=mtex.LeftUV,
+                Color col = new(255, 41, 41, 255);
+                Color trans = new(0, 0, 0, 0);
+                if (fmt != Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color)
+                {
+                    Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), "Looks loke you have found a image in different format. Send it to me so I could add support for it.\n"
+                        + $"Metxture:{mtex.Atlas.DataPath} {mtex.AtlasPath}");
+                }
+                switch (fmt)
+                {
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color:
+                        calcTyped(col, trans);
+                        break;
+                    //todo: I don't have image in below format.
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Vector4:
+                        {
+                            calcTyped(col.ToVector4(), trans.ToVector4());
+                        }
+                        break;
+                    //omg they're all big endian
+                    //oh, just reverse them in func
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Bgra4444:
+                        calcBigEndian([0, 255], [0, 0]);
+                        break;
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Bgra5551:
+                        calcBigEndian([0, 63], [0, 0]);
+                        break;
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.ColorBgraEXT:
+                        calcBigEndian([0, 0, 255, 255], [0, 0, 0, 0]);
+                        break;
+                    //case Microsoft.Xna.Framework.Graphics.SurfaceFormat.ColorSrgbEXT:
+                    //    //What's this?
+                    //    break;
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.HalfVector4:
+                        var oh = BitConverter.HalfToUInt16Bits((Half)1.0);
+                        var ohb = BitConverter.GetBytes(oh);
+                        var zh = BitConverter.HalfToUInt16Bits((Half)0.0);
+                        var zhb = BitConverter.GetBytes(zh);
+                        calcBigEndian([.. ohb, .. ohb, .. zhb, .. zhb], [.. zhb, .. zhb, .. zhb, .. zhb,]);
+                        break;
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Rgba1010102:
+                        calcBigEndian([0, 0, 15, 255], [0, 0, 0, 0,]);
+                        break;
+                    case Microsoft.Xna.Framework.Graphics.SurfaceFormat.Rgba64:
+                        calcBigEndian([255, 255, 0, 0, 0, 0, 255, 255], [0, 0, 0, 0, 0, 0, 0, 0,]);
+                        break;
+                    default:
+                        Logger.Log(LogLevel.Warn, nameof(BetterRefillGemsPlus), $"failed when loading {mtex.Atlas.DataPath} {mtex.AtlasPath} . unsupported surface format {fmt}.");
+                        return mtex;
+                }
+                return new MTexture(nvtex)
+                {
+                    Atlas = mtex.Atlas,
+                    AtlasPath = mtex.AtlasPath,
+                    Center = mtex.Center,
+                    //BottomUV=mtex.BottomUV,
+                    DrawOffset = mtex.DrawOffset,
+                    //LeftUV=mtex.LeftUV,
 
-            };
+                };
+
+            }
+            catch(Exception ex)
+            {
+                Logger.Log(nameof(BetterRefillGemsPlus), $"Something went wrong when trying to create {mtex.Atlas.DataPath} {mtex.AtlasPath} .\nException: {ex.Message}\n{ex.StackTrace}");
+                return mtex;
+            }
+            finally
+            {
+                BetterRefillGemsPlusModule.loadimmediately.TryRemove(Environment.CurrentManagedThreadId, out _);
+            }
         }
 
 
