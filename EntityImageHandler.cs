@@ -45,8 +45,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             //RegisterSpriteReflectionReflection("FrostHelper.HeldRefill", "Sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.CryoRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.GrappleRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.StarRefill", "sprite", "oneUse");
             RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.StopwatchRefill", "sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("Celeste.Mod.ReverseHelper.Entities.HoldableRefill", "sprite", "oneUse");
@@ -61,12 +59,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
             RegisterSpriteReflectionReflection("Celeste.Mod.Batteries.PowerRefill", "sprite", "oneUse");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.JungleHelper.Entities.RemoteKevinRefill", "sprite", "oneUse");
-
-            RegisterSpriteReflectionReflection("Celeste.Mod.GravityHelper.Entities.GravityRefill", "_sprite", "OneUse");
-
-            RegisterSpriteReflectionReflection("Celeste.Mod.ChronoHelper.Entities.ShatterRefill", "sprite", "oneUse");
-
             RegisterSpriteReflectionReflection("Celeste.Mod.CherryHelper.ShadowDashRefill", "sprite", "oneUse");
 
             RegisterSpriteReflectionReflection("Celeste.Mod.SaladimHelper.Entities.FlagRefill", "sprite", "oneUse");
@@ -74,6 +66,16 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
             RegisterSpriteReflectionReflection("Celeste.Mod.XaphanHelper.Entities.TimerRefill", "sprite", "oneUse");
 
+
+            //they shared sprite
+            //RegisterSpriteReflectionReflection("Celeste.Mod.ChronoHelper.Entities.ShatterRefill", "sprite", "oneUse");
+
+            //RegisterSpriteReflectionReflection("Celeste.Mod.GravityHelper.Entities.GravityRefill", "_sprite", "OneUse");
+
+            //RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.StarRefill", "sprite", "oneUse");
+            //RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.GrappleRefill", "sprite", "oneUse");
+
+            //RegisterSpriteReflectionReflection("Celeste.Mod.JungleHelper.Entities.RemoteKevinRefill", "sprite", "oneUse");
         }
 
         public static void CheckAndReplaceSprite(Entity e)
