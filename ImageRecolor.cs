@@ -15,6 +15,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         static Dictionary<(Atlas, string), MTexture> resultcomplete = [];
         public static MTexture MTextureDrawOutline(MTexture mtex)
         {
+            VirtualTexture? nvtex = null;
             try
             {
                 var orig = mtex.Texture.Texture_Safe;
@@ -22,7 +23,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 var fmt = orig.Format;
                 //var sin = stackalloc byte[16];
                 BetterRefillGemsPlusModule.loadimmediately.TryAdd(Environment.CurrentManagedThreadId, null);
-                var nvtex = new VirtualTexture(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), rect.Width, rect.Height, Color.Transparent);
+                nvtex = new VirtualTexture(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), rect.Width, rect.Height, Color.Transparent);
                 bool outrange(int v1, int v2)
                 {
                     return !(v1 >= 0 && v1 < rect.Width && v2 < rect.Height && v2 >= 0);
@@ -147,8 +148,9 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 };
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                nvtex?.Dispose();
                 Logger.Log(nameof(BetterRefillGemsPlus), $"Something went wrong when trying to create {mtex.Atlas.DataPath} {mtex.AtlasPath} .\nException: {ex.Message}\n{ex.StackTrace}");
                 return mtex;
             }
