@@ -151,7 +151,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             catch (Exception ex)
             {
                 nvtex?.Dispose();
-                Logger.Log(nameof(BetterRefillGemsPlus), $"Something went wrong when trying to create {mtex.Atlas.DataPath} {mtex.AtlasPath} .\nException: {ex.Message}\n{ex.StackTrace}");
+                Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"Something went wrong when trying to create {mtex.Atlas.DataPath} {mtex.AtlasPath} .\nException: {ex.Message}\n{ex.StackTrace}"); ;
                 return mtex;
             }
             finally
