@@ -26,7 +26,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 nvtex = new VirtualTexture(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), rect.Width, rect.Height, Color.Transparent);
                 bool outrange(int v1, int v2)
                 {
-                    return !(v1 >= 0 && v1 < rect.Width && v2 < rect.Height && v2 >= 0);
+                    return !(v1 >= 0 && v1 < rect.Height && v2 < rect.Width && v2 >= 0);
                 }
                 void calcTyped<T>(T sin, T transparent) where T : struct
                 {
