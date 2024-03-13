@@ -1,4 +1,5 @@
-﻿using Monocle;
+﻿using Celeste.Mod.Entities;
+using Monocle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,125 +12,164 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 {
     static class EntityImageHandler
     {
-        public static Dictionary<Type, Func<Entity, bool>> oneuser = [];
-        public static CacheDictionary<Type, List<Action<Entity>>> Registered = new(x => []);
-        public static CacheDictionary<Type, List<Action<Entity>>> RegisteredSafe = new(x => []);
-        public static CacheDictionary<string, List<Action<Entity>>> RegisteredRefl = new(x => []);
+        //public static Dictionary<Type, Func<Entity, bool>> oneuser = [];
+        public static DefaultDictionary<Type, List<Action<Entity>>> Registered = new(x => []);
+        public static DefaultDictionary<Type, List<Action<Entity>>> RegisteredSafe = new(x => []);
+        public static DefaultDictionary<string, List<Action<Entity>>> RegisteredRefl = new(x => []);
+        public static DefaultDictionary<string, (List<Func<Entity, bool>> OneUseGetter, List<Func<Entity, Sprite>> SpriteGetter)> TryRegisterer = new(x => ([], []));
         internal static void Load()
         {
-            RegisterSprite(typeof(Refill), e => (e as Refill).sprite, e => (e as Refill).oneUse);
+            RegisterSprite(typeof(Refill), e => (e as Refill)!.sprite, e => (e as Refill)!.oneUse);
         }
         internal static void LoadContent()
         {
-            RegisterAs((null, "Celeste.Mod.DJMapHelper.Entities.ColorfulRefill"), (typeof(Refill), null));
-            RegisterAs((null, "Celeste.Mod.MaxHelpingHand.Entities.CustomizableRefill"), (typeof(Refill), null));
+            TryAutoRegister("DJMapHelper/colorfulRefill");
+            TryAutoRegister("MaxHelpingHand/CustomizableRefill");
 
-            RegisterAs((null, "Celeste.Mod.CommunalHelper.DashStates.DreamTunnelRefill"), (typeof(Refill), null));
-            RegisterAs((null, "Celeste.Mod.CommunalHelper.DashStates.SeekerDashRefill"), (typeof(Refill), null));
-            RegisterAs((null, "Celeste.Mod.CommunalHelper.Entities.StrawberryJam.ExpiringDashRefill"), (typeof(Refill), null));
+            TryAutoRegister("CommunalHelper/DreamRefill");
+            TryAutoRegister("CommunalHelper/SeekerDashRefill");
+            TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
 
-            RegisterAs((null, "ExtendedVariants.Entities.ForMappers.JumpRefill"), (typeof(Refill), null));
+            TryAutoRegister("ExtendedVariantMode/ExtraJumpRefill");
+            //TryAutoRegister("ExtendedVariantMode/RecoverJumpRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.CoreRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.CloudRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.BoosterRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.FeatherRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.JellyRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.Anonhelper.SuperDashRefill", "sprite", "oneUse");
+            TryAutoRegister("Anonhelper/CoreRefill");
+            TryAutoRegister("Anonhelper/CloudRefill");
+            TryAutoRegister("Anonhelper/BoosterRefill");
+            TryAutoRegister("Anonhelper/FeatherRefill");
+            TryAutoRegister("Anonhelper/JellyRefill");
+            TryAutoRegister("Anonhelper/SuperDashRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.ArphimigonHelper.RefillRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.ArphimigonHelper.DifficultRefill", "sprite", "oneUse");
+            TryAutoRegister("ArphimigonHelper/RefillRefill");
+            TryAutoRegister("ArphimigonHelper/DifficultRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.CommunalHelper.Entities.ShieldedRefill", "sprite", "oneUse");
+            TryAutoRegister("CommunalHelper/ShieldedRefill");
 
-            RegisterSpriteReflectionReflection("FrostHelper.PlusOneRefill", "sprite", "oneUse");
-            //RegisterSpriteReflectionReflection("FrostHelper.HeldRefill", "Sprite", "oneUse");
+            TryAutoRegister("FrostHelper/PlusOneRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.CryoRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.StopwatchRefill", "sprite", "oneUse");
+            TryAutoRegister("JackalHelper/CryoRefill");
+            TryAutoRegister("JackalHelper/TracerRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.ReverseHelper.Entities.HoldableRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.ReverseHelper.Entities.LongDashRefill", "sprite", "oneUse");
+            TryAutoRegister("ReverseHelper/HoldableRefill");
 
-            RegisterSpriteReflectionReflection("MoreDasheline.SpecialRefill", "sprite", "oneUse");
+            TryAutoRegister("MoreDasheline/SpecialRefill");
 
-            //RegisterSpriteReflectionReflection("VivHelper.Entities.RedDashRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("VivHelper.Entities.WarpDashRefill", "sprite", "oneUse");
+            TryAutoRegister("VivHelper/RedDashRefill");
+            TryAutoRegister("VivHelper/WarpDashRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.BounceHelper.BounceRefill", "sprite", "oneUse");
+            TryAutoRegister("BounceHelper/BounceRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.Batteries.PowerRefill", "sprite", "oneUse");
+            TryAutoRegister("batteries/power_refill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.CherryHelper.ShadowDashRefill", "sprite", "oneUse");
+            TryAutoRegister("CherryHelper/ShadowDashRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.SaladimHelper.Entities.FlagRefill", "sprite", "oneUse");
-            RegisterSpriteReflectionReflection("Celeste.Mod.SaladimHelper.Entities.BitsMomentumRefill", "sprite", "oneUse");
+            TryAutoRegister("SaladimHelper/FlagRefill");
+            TryAutoRegister("SaladimHelper/BitsMomentumRefill");
 
-            RegisterSpriteReflectionReflection("Celeste.Mod.XaphanHelper.Entities.TimerRefill", "sprite", "oneUse");
+            TryAutoRegister("XaphanHelper/TimerRefill");
 
+            //no, just because CreateClone() is not deepclone. (at least not deep enough)
+            TryAutoRegister("ChronoHelper/ShatterRefill");
 
-            //they shared sprite
-            //RegisterSpriteReflectionReflection("Celeste.Mod.ChronoHelper.Entities.ShatterRefill", "sprite", "oneUse");
+            TryAutoRegister("GravityHelper/GravityRefill");
 
-            //RegisterSpriteReflectionReflection("Celeste.Mod.GravityHelper.Entities.GravityRefill", "_sprite", "OneUse");
+            TryAutoRegister("JackalHelper/StarRefill");
+            TryAutoRegister("JackalHelper/GrappleRefill");
 
-            //RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.StarRefill", "sprite", "oneUse");
-            //RegisterSpriteReflectionReflection("Celeste.Mod.JackalHelper.Entities.GrappleRefill", "sprite", "oneUse");
-
-            //RegisterSpriteReflectionReflection("Celeste.Mod.JungleHelper.Entities.RemoteKevinRefill", "sprite", "oneUse");
+            TryAutoRegister("JungleHelper/RemoteKevinRefill");
         }
 
         public static void CheckAndReplaceSprite(Entity e)
         {
             Type ety = e.GetType();
-            if (RegisteredSafe.TryGetValue(e.GetType(), out var func))
+            if (RegisteredSafe.TryGetValue(ety, out var func))
             {
-                foreach (var f in func)
-                {
-                    f(e);
-                }
-            }
-            if (Registered.Remove(e.GetType(), out func))
-            {
-                List<Action<Entity>> exc = [];
                 foreach (var f in func)
                 {
                     try
                     {
                         f(e);
+                        return;
                     }
                     catch (Exception ex)
                     {
-                        Logger.Log(nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {e.GetType().FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
-                        exc.Add(f);
+                        Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {ety.FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
                     }
                 }
-                foreach (var f in exc)
-                {
-                    func.Remove(f);
-                }
-                RegisteredSafe[e.GetType()] = func;
             }
-            if (RegisteredRefl.Remove(e.GetType().FullName, out func))
+            bool flag = Registered.Remove(ety, out func);
+            //still try to clear other matched result
+            flag = RegisteredRefl.Remove(ety.FullName!, out var func2) || flag;
+
+            if (flag)
             {
-                List<Action<Entity>> exc = [];
-                foreach (var f in func)
+                func ??= func2;
+                RegisteredSafe[ety] = func!.Where(f =>
                 {
                     try
                     {
                         f(e);
+                        return true;
                     }
                     catch (Exception ex)
                     {
-                        Logger.Log(nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {e.GetType().FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
-                        exc.Add(f);
+                        Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {ety.FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
+                        return false;
+                    }
+                }).ToList();
+            }
+            if (TryRegisterer.Any())
+            {
+                var EntityID = (
+                    ety.CustomAttributes
+                    .FirstOrDefault(x => x.AttributeType == typeof(CustomEntityAttribute))?
+                    .ConstructorArguments
+                    .FirstOrDefault()
+                    .Value as System.Collections.ObjectModel.ReadOnlyCollection<System.Reflection.CustomAttributeTypedArgument>)?
+                    .Select(x =>
+                        (x.Value as string)?.Split('=')
+                        .Select(x => x.Trim())
+                        .FirstOrDefault());
+                if (EntityID is not null)
+                {
+                    foreach (var v in EntityID)
+                    {
+                        if (TryRegisterer.Remove(v!, out var funcl))
+                        {
+                            if (!flag)
+                            {
+                                var (ong, spg) = funcl;
+                                try
+                                {
+                                    var roneuse = ong.First(x =>
+                                    {
+                                        try { x(e); return true; }
+                                        catch { return false; }
+                                    });
+                                    var rsprite = spg.First(x =>
+                                    {
+                                        try { x(e); return true; }
+                                        catch { return false; }
+                                    });
+                                    void reg(Entity e)
+                                    {
+                                        if (roneuse(e))
+                                        {
+                                            ReplaceSprite(rsprite(e));
+                                        }
+                                    }
+                                    reg(e);
+                                    RegisteredSafe[ety] = [reg];
+                                    break;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {ety.FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
+                                }
+                            }
+                        }
                     }
                 }
-                foreach (var f in exc)
-                {
-                    func.Remove(f);
-                }
-                RegisteredSafe[e.GetType()] = func;
             }
         }
         public static void ReplaceSprite(Entity e)
@@ -139,16 +179,17 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 ReplaceSprite(c);
             }
         }
-        internal static CacheDictionary<(Type, string), Func<Entity, Sprite>> refler = new(x =>
-        {
-            return ReflectionHandler.GetGetter<Sprite>(x.Item1, x.Item2);
-        });
+        //internal static CacheDictionary<(Type, string), Func<Entity, Sprite>> refler = new(x =>
+        //{
+        //    return ReflectionHandler.GetGetter<Sprite>(x.Item1, x.Item2);
+        //});
 
         public static void ReplaceSpriteReflection(Entity e, params string[] s)
         {
             foreach (var u in s)
             {
-                ReplaceSprite(refler[(e.GetType(), u)](e));
+                ReplaceSprite(ReflectionHandler.GetGetter<Sprite>(e.GetType(), u)!(e));
+                //should throw nullptr exception
             }
         }
         public static void ReplaceSprite(Sprite sprite)
@@ -158,9 +199,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             sprite.animations.Select(x => (x.Key, Value: new Sprite.Animation()
             {
                 Delay = x.Value.Delay,
-                Frames = x.Value.Frames,
+                Frames = [.. x.Value.Frames],
                 Goto = x.Value.Goto,
             })).ToDictionary(x => x.Key, x => x.Value);
+            sprite.currentAnimation = sprite.animations[sprite.CurrentAnimationID];
             foreach (var anim in sprite.Animations.Values)
             {
                 for (var i = 0; i < anim.Frames.Length; i++)
@@ -173,21 +215,21 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         }
         public static void ReplaceImage(Entity e)
         {
-            foreach (var c in e.Components.OfType<Image>())
+            foreach (var c in e.Components.OfType<Image>())//sprite included however
             {
                 ReplaceImage(c);
             }
         }
-        internal static CacheDictionary<(Type, string), Func<Entity, Image>> refleri = new(x =>
-        {
-            return ReflectionHandler.GetGetter<Image>(x.Item1, x.Item2);
-        });
+        //internal static DefaultDictionary<(Type, string), Func<Entity, Image>> refleri = new(x =>
+        //{
+        //    return ReflectionHandler.GetGetter<Image>(x.Item1, x.Item2);
+        //});
 
         public static void ReplaceImageReflection(Entity e, params string[] s)
         {
             foreach (var u in s)
             {
-                ReplaceImage(refleri[(e.GetType(), u)](e));
+                ReplaceImage(ReflectionHandler.GetGetter<Image>(e.GetType(), u)!(e));
             }
         }
         public static void ReplaceImage(Image Image)

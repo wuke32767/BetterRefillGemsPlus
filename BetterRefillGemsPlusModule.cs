@@ -53,7 +53,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             // TODO: apply any hooks that should always be active
             On.Monocle.Entity.Awake += Entity_Awake;
             //IL.Monocle.VirtualTexture.Load += VirtualTexture_Load;
-            var load = typeof(VirtualTexture).GetProperty("LoadImmediately", ReflectionHandler.bf).GetMethod;
+            var load = typeof(VirtualTexture).GetProperty("LoadImmediately", ReflectionHandler.bf)!.GetMethod;
             if (load != null)
             {
                 VTex_LoadImm = new Hook(load, (Func<VirtualTexture, bool> orig, VirtualTexture self) =>

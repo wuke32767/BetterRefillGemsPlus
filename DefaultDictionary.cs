@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Celeste.Mod.BetterRefillGemsPlus
 {
-    internal class CacheDictionary<TKey, TValue> : ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary<TKey, TValue>,  IDeserializationCallback, ISerializable where TKey : notnull
+    internal class DefaultDictionary<TKey, TValue> : ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary<TKey, TValue>,  IDeserializationCallback, ISerializable where TKey : notnull
     {
         private readonly Dictionary<TKey, TValue> _cache = [];
         public readonly Func<TKey, TValue> DefaultValue;
-        public CacheDictionary(Func<TKey, TValue> defaultValue)
+        public DefaultDictionary(Func<TKey, TValue> defaultValue)
         {
             DefaultValue = defaultValue;
         }

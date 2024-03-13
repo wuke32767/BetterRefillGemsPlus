@@ -75,7 +75,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             List<Action<Entity>> to;
             if (@as.type is null)
             {
-                if (EntityImageHandler.RegisteredRefl.TryGetValue(@as.fullName, out var list))
+                if (EntityImageHandler.RegisteredRefl.TryGetValue(@as.fullName!, out var list))
                 {
                     to = list;
                 }
@@ -90,14 +90,14 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     }
                     else
                     {
-                        Logger.Log(nameof(BetterRefillGemsPlus), $"No type called {@as.fullName} was registered.");
+                        Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"No type called {@as.fullName} was registered.");
                         return;
                     }
                 }
             }
             else
             {
-                if (EntityImageHandler.RegisteredRefl.TryGetValue(@as.type.FullName, out var list)
+                if (EntityImageHandler.RegisteredRefl.TryGetValue(@as.type.FullName!, out var list)
                     || EntityImageHandler.Registered.TryGetValue(@as.type, out list)
                     || EntityImageHandler.RegisteredSafe.TryGetValue(@as.type, out list))
                 {
@@ -105,7 +105,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 }
                 else
                 {
-                    Logger.Log(nameof(BetterRefillGemsPlus), $"No type called {@as.type.FullName} was registered.");
+                    Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"No type called {@as.type.FullName} was registered.");
                     return;
                 }
             }
@@ -113,7 +113,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             // better to create a clone, or it will be annoying.
             if (entity.type is null)
             {
-                EntityImageHandler.RegisteredRefl[entity.fullName] = new(to);
+                EntityImageHandler.RegisteredRefl[entity.fullName!] = new(to);
             }
             else
             {
@@ -135,9 +135,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             }
             EntityImageHandler.Registered[entity].Add(e =>
             {
+                var sp = spriteGetter(e);//try if it is broken
                 if (oneuseGetter(e))
                 {
-                    EntityImageHandler.ReplaceSprite(spriteGetter(e));
+                    EntityImageHandler.ReplaceSprite(sp);
                 }
             });
         }
@@ -145,25 +146,40 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
             {
-                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
-                {
-                    oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
-                }
-                if (oneuse(e))
+                if (ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName)!(e))
                 {
                     EntityImageHandler.ReplaceSpriteReflection(e, spriteName);
                 }
             });
         }
+        public static void TryAutoRegister(string entityID)
+        {
+            EntityImageHandler.TryRegisterer[entityID] =
+                ([
+#nullable disable //should throw if null
+                    e=> (e as Refill).oneUse,
+                    e=> (ReflectionHandler.GetGetter<bool>(e.GetType(),"oneUse"))(e),
+                    e=> (ReflectionHandler.GetGetter<bool>(e.GetType(),"OneUse"))(e),
+                    e=> (ReflectionHandler.GetGetter<bool>(e.GetType(),"oneuse"))(e),
+                    e=> (ReflectionHandler.GetGetter<bool>(e.GetType(),"_oneUse"))(e),
+                    e=> (ReflectionHandler.GetGetter<bool>(e.GetType(),"_OneUse"))(e),
+                    e=> (ReflectionHandler.GetGetter<bool>(e.GetType(),"_oneuse"))(e),
+                ],
+                [
+                    e=> (e as Refill).sprite,
+                    e=> e.Components.OfType<Sprite>().Single(s => s.Animations.ContainsKey("idle")), //but what if it is different for same type?
+                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"sprite")(e),
+                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"Sprite")(e),
+                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"_sprite")(e),
+                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"_Sprite")(e),
+                ]);
+#nullable restore
+        }
         public static void RegisterImageReflectionReflection(string entityFullname, string imageName, string oneuseName)
         {
             EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
             {
-                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
-                {
-                    oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
-                }
-                if (oneuse(e))
+                if (ReflectionHandler.GetGetter<bool>(e.GetType(),oneuseName)!(e))
                 {
                     EntityImageHandler.ReplaceImageReflection(e, imageName);
                 }
@@ -181,9 +197,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
             EntityImageHandler.Registered[entity].Add(e =>
             {
+                var im = imageGetter(e);
                 if (oneuseGetter(e))
                 {
-                    EntityImageHandler.ReplaceImage(imageGetter(e));
+                    EntityImageHandler.ReplaceImage(im);
                 }
             });
         }
