@@ -67,7 +67,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 });
             }
             EntityImageHandler.Load();
-            typeof(InteropAndInternalop).ModInterop();
+            typeof(Interop).ModInterop();
         }
         Hook? VTex_LoadImm;
         //should be safe if it's applied for multiple times.

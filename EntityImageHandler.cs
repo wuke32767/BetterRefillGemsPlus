@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Celeste.Mod.BetterRefillGemsPlus.InteropAndInternalop;
+using static Celeste.Mod.BetterRefillGemsPlus.Internalop;
+using static Celeste.Mod.BetterRefillGemsPlus.Interop;
 
 namespace Celeste.Mod.BetterRefillGemsPlus
 {
@@ -152,6 +153,14 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         }
         public static void ReplaceSprite(Sprite sprite)
         {
+            //this would not be cloned by SpriteBank.Create
+            sprite.animations =
+            sprite.animations.Select(x => (x.Key, Value: new Sprite.Animation()
+            {
+                Delay = x.Value.Delay,
+                Frames = x.Value.Frames,
+                Goto = x.Value.Goto,
+            })).ToDictionary(x => x.Key, x => x.Value);
             foreach (var anim in sprite.Animations.Values)
             {
                 for (var i = 0; i < anim.Frames.Length; i++)

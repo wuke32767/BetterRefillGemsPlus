@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Celeste.Mod.BetterRefillGemsPlus
 {
     [MonoMod.ModInterop.ModExportName("BetterRefillGemsPlus.MarkEntity")]
-    internal static class InteropAndInternalop
+    public static class Interop
     {
         /// <summary>
         /// Register your entity so their sprite will be replaced when awaking.
@@ -27,91 +27,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 if (oneuseGetter(e))
                 {
                     EntityImageHandler.ReplaceSprite(spriteGetter(e));
-                }
-            });
-        }
-        /// <summary>
-        /// why you need this?
-        /// </summary>
-        /// <param name="spriteName">field or property name.</param>
-        /// <param name="oneuseName">field or property name.</param>
-        /// <seealso cref="RegisterSprite"/>
-        public static void RegisterSpriteReflection(Type entity, string spriteName, string oneuseName)
-        {
-            var spriteGetter = ReflectionHandler.GetGetter<Sprite>(entity, spriteName);
-            var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
-            if (spriteGetter is null || oneuseGetter is null)
-            {
-                Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
-                return;
-            }
-            EntityImageHandler.Registered[entity].Add(e =>
-            {
-                if (oneuseGetter(e))
-                {
-                    EntityImageHandler.ReplaceSprite(spriteGetter(e));
-                }
-            });
-        }
-        /// <summary>
-        /// it's for me.
-        /// </summary>
-        /// <param name="entityFullname">Fullname of type.</param>
-        /// <seealso cref="RegisterSpriteReflection"/>
-        public static void RegisterSpriteReflectionReflection(string entityFullname, string spriteName, string oneuseName)
-        {
-            EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
-            {
-                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
-                {
-                    oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
-                }
-                if (oneuse(e))
-                {
-                    EntityImageHandler.ReplaceSpriteReflection(e, spriteName);
-                }
-            });
-        }
-        /// <summary>
-        /// it's for me.
-        /// </summary>
-        /// <param name="entityFullname">Fullname of type.</param>
-        /// <seealso cref="RegisterImageReflection"/>
-        public static void RegisterImageReflectionReflection(string entityFullname, string imageName, string oneuseName)
-        {
-            EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
-            {
-                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
-                {
-                    oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
-                }
-                if (oneuse(e))
-                {
-                    EntityImageHandler.ReplaceImageReflection(e, imageName);
-                }
-            });
-        }
-        /// <summary>
-        /// why you need this?
-        /// </summary>
-        /// <param name="spriteName">field or property name.</param>
-        /// <param name="oneuseName">field or property name.</param>
-        /// <seealso cref="RegisterImage"/>
-        public static void RegisterImageReflection(Type entity, string imageName, string oneuseName)
-        {
-            var imageGetter = ReflectionHandler.GetGetter<Image>(entity, imageName);
-            var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
-            if (imageGetter is null || oneuseGetter is null)
-            {
-                Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
-                return;
-            }
-
-            EntityImageHandler.Registered[entity].Add(e =>
-            {
-                if (oneuseGetter(e))
-                {
-                    EntityImageHandler.ReplaceImage(imageGetter(e));
                 }
             });
         }
@@ -206,5 +121,72 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             }
 
         }
+    }
+    internal static class Internalop
+    {
+        public static void RegisterSpriteReflection(Type entity, string spriteName, string oneuseName)
+        {
+            var spriteGetter = ReflectionHandler.GetGetter<Sprite>(entity, spriteName);
+            var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
+            if (spriteGetter is null || oneuseGetter is null)
+            {
+                Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
+                return;
+            }
+            EntityImageHandler.Registered[entity].Add(e =>
+            {
+                if (oneuseGetter(e))
+                {
+                    EntityImageHandler.ReplaceSprite(spriteGetter(e));
+                }
+            });
+        }
+        public static void RegisterSpriteReflectionReflection(string entityFullname, string spriteName, string oneuseName)
+        {
+            EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
+            {
+                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
+                {
+                    oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
+                }
+                if (oneuse(e))
+                {
+                    EntityImageHandler.ReplaceSpriteReflection(e, spriteName);
+                }
+            });
+        }
+        public static void RegisterImageReflectionReflection(string entityFullname, string imageName, string oneuseName)
+        {
+            EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
+            {
+                if (!EntityImageHandler.oneuser.TryGetValue(e.GetType(), out var oneuse))
+                {
+                    oneuse = EntityImageHandler.oneuser[e.GetType()] = ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName);
+                }
+                if (oneuse(e))
+                {
+                    EntityImageHandler.ReplaceImageReflection(e, imageName);
+                }
+            });
+        }
+        public static void RegisterImageReflection(Type entity, string imageName, string oneuseName)
+        {
+            var imageGetter = ReflectionHandler.GetGetter<Image>(entity, imageName);
+            var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
+            if (imageGetter is null || oneuseGetter is null)
+            {
+                Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
+                return;
+            }
+
+            EntityImageHandler.Registered[entity].Add(e =>
+            {
+                if (oneuseGetter(e))
+                {
+                    EntityImageHandler.ReplaceImage(imageGetter(e));
+                }
+            });
+        }
+
     }
 }
