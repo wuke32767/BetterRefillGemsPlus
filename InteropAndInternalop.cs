@@ -51,14 +51,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             });
         }
         /// <summary>
-        /// If your entity is derived from Refill and re-used its sprite and oneUse,
-        /// you can use this.
-        /// for example, to support ColorfulRefill [DJMapHelper]:
-        /// <code>RegisterAs((typeof(ColorfulRefill), null), (typeof(Refill), null));</code>
-        /// reflection:
-        /// <code>RegisterAs((null, "Celeste.Mod.DJMapHelper.Entities.ColorfulRefill"), (typeof(Refill), null));</code>
-        /// 
-        /// something was changed. you should register target type before register smth as it.
+        /// better not to use this. I don't think you will need reflection.
         /// </summary>
         /// <param name="entity">holds a value of one of (Type, string). type and fullName are functionally the same, one is Type and the other is Type from reflection.</param>
         /// <param name="as">same as entity</param>
@@ -120,6 +113,34 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 EntityImageHandler.Registered[entity.type] = new(to);
             }
 
+        }
+        /// <summary>
+        /// If your entity is derived from Refill and re-used its sprite and oneUse,
+        /// you can use this.
+        /// for example, to support ColorfulRefill [DJMapHelper]:
+        /// <code>RegisterAs(typeof(ColorfulRefill), typeof(Refill));</code>
+        /// 
+        /// something was changed. you should register target type before register smth as it.
+        /// and "as" entity can't be registered by reflection.
+        /// </summary>
+        /// <param name="entity">holds a value of one of (Type, string). type and fullName are functionally the same, one is Type and the other is Type from reflection.</param>
+        /// <param name="as">same as entity</param>
+        public static void RegisterAs(Type entity, Type @as)
+        {
+            List<Action<Entity>> to;
+            if (EntityImageHandler.Registered.TryGetValue(@as, out var list)
+                || EntityImageHandler.RegisteredSafe.TryGetValue(@as, out list))
+            {
+                to = list;
+            }
+            else
+            {
+                Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"No type called {@as.FullName} was registered.");
+                return;
+            }
+
+            // better to create a clone, or it will be annoying.
+            EntityImageHandler.Registered[entity] = new(to);
         }
     }
     internal static class Internalop
