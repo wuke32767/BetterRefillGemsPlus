@@ -78,7 +78,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
             TryAutoRegister("JungleHelper/RemoteKevinRefill");
         }
-
+        public static HashSet<Type> CheckedType = [];
         public static void CheckAndReplaceSprite(Entity e)
         {
             Type ety = e.GetType();
@@ -96,6 +96,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                         Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"Exception was thrown when trying to replace {ety.FullName} 's sprite. Detail message: \n{ex.Message}\n{ex.StackTrace}");
                     }
                 }
+            }
+            if(!CheckedType.Add(ety))
+            {
+                return;
             }
             bool flag = Registered.Remove(ety, out func);
             //still try to clear other matched result
@@ -120,6 +124,8 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             }
             if (TryRegisterer.Any())
             {
+                //it looks scary so must be slow
+                //although TryRegisterer.Any() is impossible to be false
                 var EntityID = (
                     ety.CustomAttributes
                     .FirstOrDefault(x => x.AttributeType == typeof(CustomEntityAttribute))?

@@ -12,13 +12,22 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         public override void End()
         {
         }
-        public Dictionary<string, Action<BinaryPacker.Element>> preprocessor = new()
+        public static Dictionary<string, Action<BinaryPacker.Element>> preprocessor = new()
         {
-            //{"entity:refill", refill =>
-            //{
-            //    ImageRecolor.MarkResourceImageAsync("objects/refillTwo/idle");
-            //    ImageRecolor.MarkResourceImageAsync("objects/refill/idle");
-            //}},
+            {"entity:refill", refill =>
+            {
+                if(refill.AttrBool("oneUse"))
+                {
+                    if(refill.AttrBool("twoDash"))
+                    {
+                        ImageRecolor.MarkResourceSpriteAsync("objects/refillTwo/idle");
+                    }
+                    else
+                    { 
+                        ImageRecolor.MarkResourceSpriteAsync("objects/refill/idle");
+                    }
+                }
+            }},
             //{"entity:refill", refill =>
             //{
             //    Recolor.MarkResourceImage("objects/refillTwo/idle");

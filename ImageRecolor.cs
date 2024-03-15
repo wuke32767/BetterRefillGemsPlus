@@ -161,26 +161,37 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         }
 
 
-        public static Task<MTexture> MarkResourceImageAsync(string s, Atlas atlas = null)
+        public static Task<MTexture>? MarkResourceImageAsync(string s, Atlas atlas = null)
         {
-            var task = Task.Run(() => MarkResourceImage(s, atlas));
-            result.TryAdd((atlas, s), task);
-            return task;
+            if (!result.ContainsKey((atlas, s)) && !resultcomplete.ContainsKey((atlas, s)))
+            {
+                var task = Task.Run(() => MTextureDrawOutline(atlas[s]));
+                result[(atlas, s)] = task;
+                return task;
+            }
+            return null;
         }
         public static MTexture MarkResourceImage(string s, Atlas atlas = null)
         {
             atlas ??= GFX.Game;
-            var mtex = atlas[s];
-            return MTextureDrawOutline(mtex);
+            return MTextureDrawOutline(atlas[s]);
         }
         public static void MarkResourceSpriteAsync(string s, Atlas atlas = null, params string[] path)
         {
+            if (path.Length == 0)
+            {
+                path = [""];
+            }
             atlas ??= GFX.Game;
             foreach (var u in path)
             {
                 foreach (var v in atlas.GetAtlasSubtextures(s + u))
                 {
-                    result.TryAdd((atlas, v.AtlasPath), Task.Run(() => MTextureDrawOutline(v)));
+                    if (!result.ContainsKey((atlas, s)) && !resultcomplete.ContainsKey((atlas, s)))
+                    {
+                        var task = Task.Run(() => MTextureDrawOutline(atlas[s]));
+                        result[(atlas, s)] = task;
+                    }
                 }
             }
         }
