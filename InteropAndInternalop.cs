@@ -12,7 +12,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
     {
         /// <summary>
         /// Register your entity so their sprite will be replaced when awaking.
-        /// Do not share entities' sprite. CreateClone or build a new sprite for each entity.
         /// </summary>
         /// <param name="entity">typeof your entity.</param>
         /// <param name="spriteGetter">a getter that returns the sprite of the given entity.</param>
@@ -123,7 +122,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         /// for example, to support ColorfulRefill [DJMapHelper]:
         /// <code>RegisterAs(typeof(ColorfulRefill), typeof(Refill));</code>
         /// 
-        /// something was changed. you should register target type before register smth as it.
+        /// you should register target type before register smth as it.
         /// and "as" entity can't be registered by reflection.
         /// </summary>
         /// <param name="entity">holds a value of one of (Type, string). type and fullName are functionally the same, one is Type and the other is Type from reflection.</param>
@@ -149,59 +148,40 @@ namespace Celeste.Mod.BetterRefillGemsPlus
     }
     internal static class Internalop
     {
-        public static void RegisterSpriteReflection(Type entity, string spriteName, string oneuseName)
-        {
-            var spriteGetter = ReflectionHandler.GetGetter<Sprite>(entity, spriteName);
-            var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
-            if (spriteGetter is null || oneuseGetter is null)
-            {
-                Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
-                return;
-            }
-            EntityImageHandler.CheckedType.Clear();
-            EntityImageHandler.Registered[entity].Add(e =>
-            {
-                var sp = spriteGetter(e);//check if it is broken
-                if (oneuseGetter(e))
-                {
-                    EntityImageHandler.ReplaceSprite(sp);
-                }
-            });
-        }
-        public static void RegisterSpriteReflectionReflection(string entityFullname, string spriteName, string oneuseName)
-        {
-            EntityImageHandler.CheckedType.Clear();
-            EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
-            {
-                if (ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName)!(e))
-                {
-                    EntityImageHandler.ReplaceSpriteReflection(e, spriteName);
-                }
-            });
-        }
+        //public static void RegisterSpriteReflection(Type entity, string spriteName, string oneuseName)
+        //{
+        //    var spriteGetter = ReflectionHandler.GetGetter<Sprite>(entity, spriteName);
+        //    var oneuseGetter = ReflectionHandler.GetGetter<bool>(entity, oneuseName);
+        //    if (spriteGetter is null || oneuseGetter is null)
+        //    {
+        //        Logger.Log(nameof(BetterRefillGemsPlus), $"failed when register {entity}");
+        //        return;
+        //    }
+        //    EntityImageHandler.CheckedType.Clear();
+        //    EntityImageHandler.Registered[entity].Add(e =>
+        //    {
+        //        var sp = spriteGetter(e);//check if it is broken
+        //        if (oneuseGetter(e))
+        //        {
+        //            EntityImageHandler.ReplaceSprite(sp);
+        //        }
+        //    });
+        //}
+        //public static void RegisterSpriteReflectionReflection(string entityFullname, string spriteName, string oneuseName)
+        //{
+        //    EntityImageHandler.CheckedType.Clear();
+        //    EntityImageHandler.RegisteredRefl[entityFullname].Add(e =>
+        //    {
+        //        if (ReflectionHandler.GetGetter<bool>(e.GetType(), oneuseName)!(e))
+        //        {
+        //            EntityImageHandler.ReplaceSpriteReflection(e, spriteName);
+        //        }
+        //    });
+        //}
         public static void TryAutoRegister(string entityID)
         {
             EntityImageHandler.CheckedType.Clear();
-            EntityImageHandler.TryRegisterer[entityID] =
-                ([
-#nullable disable //should throw if null
-                    e=> (e as Refill).oneUse,
-                    e=> ReflectionHandler.GetGetter<bool>(e.GetType(),"oneUse")(e),
-                    e=> ReflectionHandler.GetGetter<bool>(e.GetType(),"OneUse")(e),
-                    e=> ReflectionHandler.GetGetter<bool>(e.GetType(),"oneuse")(e),
-                    e=> ReflectionHandler.GetGetter<bool>(e.GetType(),"_oneUse")(e),
-                    e=> ReflectionHandler.GetGetter<bool>(e.GetType(),"_OneUse")(e),
-                    e=> ReflectionHandler.GetGetter<bool>(e.GetType(),"_oneuse")(e),
-                ],
-                [
-                    e=> (e as Refill).sprite,
-                    e=> e.Components.OfType<Sprite>().Single(s => s.Animations.ContainsKey("idle")), //but what if it is different for same type?
-                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"sprite")(e),
-                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"Sprite")(e),
-                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"_sprite")(e),
-                    e=> ReflectionHandler.GetGetter<Sprite>(e.GetType(),"_Sprite")(e),
-                ]);
-#nullable restore
+            EntityImageHandler.TryRegisterer.Add(entityID);
         }
         //public static void RegisterImageReflectionReflection(string entityFullname, string imageName, string oneuseName)
         //{

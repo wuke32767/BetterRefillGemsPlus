@@ -2,6 +2,7 @@
 using Monocle;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         public static DefaultDictionary<Type, List<Action<Entity>>> Registered = new(x => []);
         public static DefaultDictionary<Type, List<Action<Entity>>> RegisteredSafe = new(x => []);
         public static DefaultDictionary<string, List<Action<Entity>>> RegisteredRefl = new(x => []);
-        public static DefaultDictionary<string, (List<Func<Entity, bool>> OneUseGetter, List<Func<Entity, Sprite>> SpriteGetter)> TryRegisterer = new(x => ([], []));
+        public static HashSet<string> TryRegisterer = [];
         internal static void Load()
         {
             RegisterSprite(typeof(Refill), e => (e as Refill)!.sprite, e => (e as Refill)!.oneUse);
@@ -79,6 +80,80 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             TryAutoRegister("JungleHelper/RemoteKevinRefill");
         }
         public static HashSet<Type> CheckedType = [];
+
+        static Action<Entity>? GetCorrectModifier(Type t, Entity sample)
+        {
+            [DebuggerNonUserCode]
+            [DebuggerHidden]
+            Func<Entity, T>? test<T>(Func<Entity, T>? f)
+            {
+                try
+                {
+                    if (f is not null)
+                    {
+                        var a = f.Invoke(sample);
+                        if (a is not null)
+                        {
+                            return f;
+                        }
+                    }
+                }
+                catch (Exception) { }
+                return null;
+            }
+            Func<Entity, Func<Entity, bool>?>[] oneuses =
+                [
+                    static e => (e is Refill) ? e => (e as Refill)!.oneUse : null,
+                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "oneUse"),
+                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "OneUse"),
+                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "oneuse"),
+                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "_oneUse"),
+                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "_OneUse"),
+                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "_oneuse"),
+                ];
+            Func<Entity, bool>? first = null;
+            foreach (var v in oneuses)
+            {
+                first = test(v(sample));
+                if (first is not null)
+                {
+                    break;
+                }
+            }
+            Func<Entity, Func<Entity, Sprite>?>[] sprites =
+                [
+                    static e => (e is Refill)?e => (e as Refill)!.sprite:null,
+                    static e => e.OfType<Sprite>().Count(s => s.Animations.ContainsKey("idle")) switch
+                        {
+                            1 => e => e.OfType<Sprite>().First(s => s.Animations.ContainsKey("idle")), //but what if it is different for same type?
+                            _ => null,
+                        },
+                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "sprite"),
+                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "Sprite"),
+                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "_sprite"),
+                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "_Sprite"),
+                ];
+            Func<Entity, Sprite>? second = null;
+            foreach (var v in sprites)
+            {
+                second = test(v(sample));
+                if (second is not null)
+                {
+                    break;
+                }
+            }
+            if (second is null || first is null)
+            {
+                return null;
+            }
+            return e =>
+            {
+                if (first(e))
+                {
+                    ReplaceSprite(second(e));
+                }
+            };
+        }
         public static void CheckAndReplaceSprite(Entity e)
         {
             Type ety = e.GetType();
@@ -97,7 +172,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     }
                 }
             }
-            if(!CheckedType.Add(ety))
+            if (!CheckedType.Add(ety))
             {
                 return;
             }
@@ -126,47 +201,30 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             {
                 //it looks scary so must be slow
                 //although TryRegisterer.Any() is impossible to be false
-                var EntityID = (
-                    ety.CustomAttributes
-                    .FirstOrDefault(x => x.AttributeType == typeof(CustomEntityAttribute))?
-                    .ConstructorArguments
-                    .FirstOrDefault()
-                    .Value as System.Collections.ObjectModel.ReadOnlyCollection<System.Reflection.CustomAttributeTypedArgument>)?
+                var EntityID =
+                    (Attribute.GetCustomAttribute(ety, typeof(CustomEntityAttribute)) as CustomEntityAttribute)?
+                    .IDs
                     .Select(x =>
-                        (x.Value as string)?.Split('=')
+                        x.Split('=')
                         .Select(x => x.Trim())
                         .FirstOrDefault());
                 if (EntityID is not null)
                 {
                     foreach (var v in EntityID)
                     {
-                        if (TryRegisterer.Remove(v!, out var funcl))
+                        if (TryRegisterer.Remove(v))
                         {
                             if (!flag)
                             {
-                                var (ong, spg) = funcl;
                                 try
                                 {
-                                    var roneuse = ong.First(x =>
+                                    var mod = GetCorrectModifier(e.GetType(), e);
+                                    if (mod is not null)
                                     {
-                                        try { x(e); return true; }
-                                        catch { return false; }
-                                    });
-                                    var rsprite = spg.First(x =>
-                                    {
-                                        try { x(e); return true; }
-                                        catch { return false; }
-                                    });
-                                    void reg(Entity e)
-                                    {
-                                        if (roneuse(e))
-                                        {
-                                            ReplaceSprite(rsprite(e));
-                                        }
+                                        RegisteredSafe[ety].Add(mod);
+                                        mod(e);
+                                        break;
                                     }
-                                    reg(e);
-                                    RegisteredSafe[ety] = [reg];
-                                    break;
                                 }
                                 catch (Exception ex)
                                 {
