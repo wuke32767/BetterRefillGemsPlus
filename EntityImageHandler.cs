@@ -24,71 +24,52 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         }
         internal static void LoadContent()
         {
-            TryAutoRegister("DJMapHelper/colorfulRefill");
-            TryAutoRegister("MaxHelpingHand/CustomizableRefill");
-
+            //TryAutoRegister("ExtendedVariantMode/RecoverJumpRefill");
+            TryAutoRegister("Anonhelper/BoosterRefill");
+            TryAutoRegister("Anonhelper/CloudRefill");
+            TryAutoRegister("Anonhelper/CoreRefill");
+            TryAutoRegister("Anonhelper/FeatherRefill");
+            TryAutoRegister("Anonhelper/JellyRefill");
+            TryAutoRegister("Anonhelper/SuperDashRefill");
+            TryAutoRegister("ArphimigonHelper/DifficultRefill");
+            TryAutoRegister("ArphimigonHelper/RefillRefill");
+            TryAutoRegister("batteries/power_refill");
+            TryAutoRegister("BounceHelper/BounceRefill");
+            TryAutoRegister("CherryHelper/ShadowDashRefill");
+            TryAutoRegister("ChroniaHelper/DecreaseRefill");
+            TryAutoRegister("ChroniaHelper/Refill");
+            TryAutoRegister("ChroniaHelper/teraRefill");
+            TryAutoRegister("ChronoHelper/ShatterRefill");
             TryAutoRegister("CommunalHelper/DreamRefill");
             TryAutoRegister("CommunalHelper/SeekerDashRefill");
             TryAutoRegister("CommunalHelper/ShieldedRefill");
             TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
-
+            TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
+            TryAutoRegister("corkr900CoopHelper/SyncedRefill");
+            TryAutoRegister("DJMapHelper/colorfulRefill");
+            TryAutoRegister("DzhakeHelper/FreezeRefill");
+            TryAutoRegister("DzhakeHelper/SequenceRefill");
             TryAutoRegister("ExtendedVariantMode/ExtraJumpRefill");
-            //TryAutoRegister("ExtendedVariantMode/RecoverJumpRefill");
-
-            TryAutoRegister("Anonhelper/CoreRefill");
-            TryAutoRegister("Anonhelper/CloudRefill");
-            TryAutoRegister("Anonhelper/BoosterRefill");
-            TryAutoRegister("Anonhelper/FeatherRefill");
-            TryAutoRegister("Anonhelper/JellyRefill");
-            TryAutoRegister("Anonhelper/SuperDashRefill");
-
-            TryAutoRegister("ArphimigonHelper/RefillRefill");
-            TryAutoRegister("ArphimigonHelper/DifficultRefill");
-
-
             TryAutoRegister("FrostHelper/PlusOneRefill");
-
+            TryAutoRegister("GravityHelper/GravityRefill");
+            TryAutoRegister("HeatMeter/IceRefill");
             TryAutoRegister("JackalHelper/CryoRefill");
+            TryAutoRegister("JackalHelper/GrappleRefill");
+            TryAutoRegister("JackalHelper/StarRefill");
             TryAutoRegister("JackalHelper/TracerRefill");
-
-            TryAutoRegister("ReverseHelper/HoldableRefill");
-
+            TryAutoRegister("JungleHelper/RemoteKevinRefill");
+            TryAutoRegister("MaxHelpingHand/CustomizableRefill");
+            TryAutoRegister("MayMayHelper/RecallRefill");
             TryAutoRegister("MoreDasheline/SpecialRefill");
-
+            TryAutoRegister("MoreDasheline/SpecialRefill");
+            TryAutoRegister("ReverseHelper/HoldableRefill");
+            TryAutoRegister("SaladimHelper/BitsMomentumRefill");
+            TryAutoRegister("SaladimHelper/FlagRefill");
+            TryAutoRegister("TeraHelper/teraRefill");
             TryAutoRegister("VivHelper/RedDashRefill");
             TryAutoRegister("VivHelper/WarpDashRefill");
-
-            TryAutoRegister("BounceHelper/BounceRefill");
-
-            TryAutoRegister("batteries/power_refill");
-
-            TryAutoRegister("CherryHelper/ShadowDashRefill");
-
-            TryAutoRegister("SaladimHelper/FlagRefill");
-            TryAutoRegister("SaladimHelper/BitsMomentumRefill");
-
             TryAutoRegister("XaphanHelper/TimerRefill");
 
-            TryAutoRegister("ChronoHelper/ShatterRefill");
-
-            TryAutoRegister("GravityHelper/GravityRefill");
-
-            TryAutoRegister("JackalHelper/StarRefill");
-            TryAutoRegister("JackalHelper/GrappleRefill");
-
-            TryAutoRegister("JungleHelper/RemoteKevinRefill");
-
-            TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
-            TryAutoRegister("MoreDasheline/SpecialRefill");
-            TryAutoRegister("ChroniaHelper/DecreaseRefill");
-            TryAutoRegister("DzhakeHelper/FreezeRefill");
-            TryAutoRegister("HeatMeter/IceRefill");
-            TryAutoRegister("MayMayHelper/RecallRefill");
-            TryAutoRegister("ChroniaHelper/Refill");
-            TryAutoRegister("DzhakeHelper/SequenceRefill");
-            TryAutoRegister("corkr900CoopHelper/SyncedRefill");
-            TryAutoRegister("TeraHelper/teraRefill");
-            TryAutoRegister("ChroniaHelper/teraRefill");
         }
         public static HashSet<Type> CheckedType = [];
 
