@@ -29,6 +29,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
             TryAutoRegister("CommunalHelper/DreamRefill");
             TryAutoRegister("CommunalHelper/SeekerDashRefill");
+            TryAutoRegister("CommunalHelper/ShieldedRefill");
             TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
 
             TryAutoRegister("ExtendedVariantMode/ExtraJumpRefill");
@@ -44,7 +45,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             TryAutoRegister("ArphimigonHelper/RefillRefill");
             TryAutoRegister("ArphimigonHelper/DifficultRefill");
 
-            TryAutoRegister("CommunalHelper/ShieldedRefill");
 
             TryAutoRegister("FrostHelper/PlusOneRefill");
 
@@ -69,7 +69,6 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 
             TryAutoRegister("XaphanHelper/TimerRefill");
 
-            //no, just because CreateClone() is not deepclone. (at least not deep enough)
             TryAutoRegister("ChronoHelper/ShatterRefill");
 
             TryAutoRegister("GravityHelper/GravityRefill");
@@ -78,6 +77,18 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             TryAutoRegister("JackalHelper/GrappleRefill");
 
             TryAutoRegister("JungleHelper/RemoteKevinRefill");
+
+            TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
+            TryAutoRegister("MoreDasheline/SpecialRefill");
+            TryAutoRegister("ChroniaHelper/DecreaseRefill");
+            TryAutoRegister("DzhakeHelper/FreezeRefill");
+            TryAutoRegister("HeatMeter/IceRefill");
+            TryAutoRegister("MayMayHelper/RecallRefill");
+            TryAutoRegister("ChroniaHelper/Refill");
+            TryAutoRegister("DzhakeHelper/SequenceRefill");
+            TryAutoRegister("corkr900CoopHelper/SyncedRefill");
+            TryAutoRegister("TeraHelper/teraRefill");
+            TryAutoRegister("ChroniaHelper/teraRefill");
         }
         public static HashSet<Type> CheckedType = [];
 
@@ -101,15 +112,17 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 catch (Exception) { }
                 return null;
             }
+            static IEnumerable<Func<Entity, Func<Entity, T>?>?> makefunc<T>(params string[] str)
+            {
+                foreach (var s in str)
+                {
+                    yield return e => ReflectionHandler.GetGetter<T>(e.GetType(), s);
+                }
+            }
             Func<Entity, Func<Entity, bool>?>[] oneuses =
                 [
                     static e => (e is Refill) ? e => (e as Refill)!.oneUse : null,
-                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "oneUse"),
-                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "OneUse"),
-                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "oneuse"),
-                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "_oneUse"),
-                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "_OneUse"),
-                    static e => ReflectionHandler.GetGetter<bool>(e.GetType(), "_oneuse"),
+                    ..makefunc<bool>("oneUse", "OneUse", "oneuse", "_oneUse", "_OneUse", "_oneuse")
                 ];
             Func<Entity, bool>? first = null;
             foreach (var v in oneuses)
@@ -128,10 +141,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                             1 => e => e.OfType<Sprite>().First(s => s.Animations.ContainsKey("idle")), //but what if it is different for same type?
                             _ => null,
                         },
-                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "sprite"),
-                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "Sprite"),
-                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "_sprite"),
-                    static e => ReflectionHandler.GetGetter<Sprite>(e.GetType(), "_Sprite"),
+                        ..makefunc<Sprite>("sprite", "Sprite", "_sprite", "_Sprite")
                 ];
             Func<Entity, Sprite>? second = null;
             foreach (var v in sprites)
