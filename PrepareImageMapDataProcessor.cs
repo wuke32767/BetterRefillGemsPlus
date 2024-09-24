@@ -12,6 +12,26 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         public override void End()
         {
         }
+        public static void AddSprite(string entityID, Func<BinaryPacker.Element, bool> oneuseGetter, Func<BinaryPacker.Element, string> spritePathGetter)
+        {
+            preprocessor.TryAdd("entity:" + entityID, elem =>
+            {
+                if (oneuseGetter(elem))
+                {
+                    ImageRecolor.MarkResourceSpriteAsync(spritePathGetter(elem));
+                }
+            });
+        }
+        public static void AddImage(string entityID, Func<BinaryPacker.Element, bool> oneuseGetter, Func<BinaryPacker.Element, string> spritePathGetter)
+        {
+            preprocessor.TryAdd("entity:" + entityID, elem =>
+            {
+                if (oneuseGetter(elem))
+                {
+                    ImageRecolor.MarkResourceImageAsync(spritePathGetter(elem));
+                }
+            });
+        }
         public static Dictionary<string, Action<BinaryPacker.Element>> preprocessor = new()
         {
             {"entity:refill", refill =>

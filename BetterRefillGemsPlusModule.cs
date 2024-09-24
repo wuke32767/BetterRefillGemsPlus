@@ -19,7 +19,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
     public class BetterRefillGemsPlusModule : EverestModule
     {
         public static BetterRefillGemsPlusModule Instance { get; private set; }
-
+        public static object debug_slot_1;
+        public static object debug_slot_2;
+        public static object debug_slot_3;
+        public static object debug_slot_4;
         public override Type SettingsType => typeof(BetterRefillGemsPlusModuleSettings);
         public static BetterRefillGemsPlusModuleSettings Settings => (BetterRefillGemsPlusModuleSettings)Instance._Settings;
         public static Atlas all = new();

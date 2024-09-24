@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static Celeste.Mod.BetterRefillGemsPlus.Internalop;
@@ -24,51 +25,52 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         }
         internal static void LoadContent()
         {
-            //TryAutoRegister("ExtendedVariantMode/RecoverJumpRefill");
-            TryAutoRegister("Anonhelper/BoosterRefill");
-            TryAutoRegister("Anonhelper/CloudRefill");
-            TryAutoRegister("Anonhelper/CoreRefill");
-            TryAutoRegister("Anonhelper/FeatherRefill");
-            TryAutoRegister("Anonhelper/JellyRefill");
-            TryAutoRegister("Anonhelper/SuperDashRefill");
-            TryAutoRegister("ArphimigonHelper/DifficultRefill");
-            TryAutoRegister("ArphimigonHelper/RefillRefill");
-            TryAutoRegister("batteries/power_refill");
-            TryAutoRegister("BounceHelper/BounceRefill");
-            TryAutoRegister("CherryHelper/ShadowDashRefill");
-            TryAutoRegister("ChroniaHelper/DecreaseRefill");
-            TryAutoRegister("ChroniaHelper/Refill");
-            TryAutoRegister("ChroniaHelper/teraRefill");
-            TryAutoRegister("ChronoHelper/ShatterRefill");
-            TryAutoRegister("CommunalHelper/DreamRefill");
-            TryAutoRegister("CommunalHelper/SeekerDashRefill");
-            TryAutoRegister("CommunalHelper/ShieldedRefill");
-            TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
-            TryAutoRegister("CommunalHelper/SJ/ExpiringDashRefill");
-            TryAutoRegister("corkr900CoopHelper/SyncedRefill");
-            TryAutoRegister("DJMapHelper/colorfulRefill");
-            TryAutoRegister("DzhakeHelper/FreezeRefill");
-            TryAutoRegister("DzhakeHelper/SequenceRefill");
-            TryAutoRegister("ExtendedVariantMode/ExtraJumpRefill");
-            TryAutoRegister("FrostHelper/PlusOneRefill");
-            TryAutoRegister("GravityHelper/GravityRefill");
-            TryAutoRegister("HeatMeter/IceRefill");
-            TryAutoRegister("JackalHelper/CryoRefill");
-            TryAutoRegister("JackalHelper/GrappleRefill");
-            TryAutoRegister("JackalHelper/StarRefill");
-            TryAutoRegister("JackalHelper/TracerRefill");
-            TryAutoRegister("JungleHelper/RemoteKevinRefill");
-            TryAutoRegister("MaxHelpingHand/CustomizableRefill");
-            TryAutoRegister("MayMayHelper/RecallRefill");
-            TryAutoRegister("MoreDasheline/SpecialRefill");
-            TryAutoRegister("MoreDasheline/SpecialRefill");
-            TryAutoRegister("ReverseHelper/HoldableRefill");
-            TryAutoRegister("SaladimHelper/BitsMomentumRefill");
-            TryAutoRegister("SaladimHelper/FlagRefill");
-            TryAutoRegister("TeraHelper/teraRefill");
-            TryAutoRegister("VivHelper/RedDashRefill");
-            TryAutoRegister("VivHelper/WarpDashRefill");
-            TryAutoRegister("XaphanHelper/TimerRefill");
+            TryAutoRegister([
+                "Anonhelper/BoosterRefill",
+                "Anonhelper/CloudRefill",
+                "Anonhelper/CoreRefill",
+                "Anonhelper/FeatherRefill",
+                "Anonhelper/JellyRefill",
+                "Anonhelper/SuperDashRefill",
+                "ArphimigonHelper/DifficultRefill",
+                "ArphimigonHelper/RefillRefill",
+                "batteries/power_refill",
+                "BounceHelper/BounceRefill",
+                "CherryHelper/ShadowDashRefill",
+                "ChroniaHelper/DecreaseRefill",
+                "ChroniaHelper/Refill",
+                "ChroniaHelper/teraRefill",
+                "ChronoHelper/ShatterRefill",
+                "CommunalHelper/DreamRefill",
+                "CommunalHelper/SeekerDashRefill",
+                "CommunalHelper/ShieldedRefill",
+                "CommunalHelper/SJ/ExpiringDashRefill",
+                "corkr900CoopHelper/SyncedRefill",
+                "DJMapHelper/colorfulRefill",
+                "DzhakeHelper/FreezeRefill",
+                "DzhakeHelper/SequenceRefill",
+                "ExtendedVariantMode/ExtraJumpRefill",
+                "ExtendedVariantMode/RecoverJumpRefill",
+                "FrostHelper/PlusOneRefill",
+                "GravityHelper/GravityRefill",
+                "HeatMeter/IceRefill",
+                "JackalHelper/CryoRefill",
+                "JackalHelper/GrappleRefill",
+                "JackalHelper/StarRefill",
+                "JackalHelper/TracerRefill",
+                "JungleHelper/RemoteKevinRefill",
+                "MaxHelpingHand/CustomizableRefill",
+                "MayMayHelper/RecallRefill",
+                "MoreDasheline/SpecialRefill",
+                "MoreDasheline/SpecialRefill",
+                "ReverseHelper/HoldableRefill",
+                "SaladimHelper/BitsMomentumRefill",
+                "SaladimHelper/FlagRefill",
+                "TeraHelper/teraRefill",
+                "VivHelper/RedDashRefill",
+                "VivHelper/WarpDashRefill",
+                "XaphanHelper/TimerRefill",
+                ]);
 
         }
         public static HashSet<Type> CheckedType = [];
@@ -103,7 +105,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             Func<Entity, Func<Entity, bool>?>[] oneuses =
                 [
                     static e => (e is Refill) ? e => (e as Refill)!.oneUse : null,
-                    ..makefunc<bool>("oneUse", "OneUse", "oneuse", "_oneUse", "_OneUse", "_oneuse")
+                    ..makefunc<bool>("oneUse", "OneUse", "oneuse", "_oneUse", "_OneUse", "_oneuse", "onlyOnce")
                 ];
             Func<Entity, bool>? first = null;
             foreach (var v in oneuses)
@@ -114,6 +116,11 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     break;
                 }
             }
+            if (first is null)
+            {
+                return null;
+            }
+
             Func<Entity, Func<Entity, Sprite>?>[] sprites =
                 [
                     static e => (e is Refill)?e => (e as Refill)!.sprite:null,
@@ -122,7 +129,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                             1 => e => e.OfType<Sprite>().First(s => s.Animations.ContainsKey("idle")), //but what if it is different for same type?
                             _ => null,
                         },
-                        ..makefunc<Sprite>("sprite", "Sprite", "_sprite", "_Sprite")
+                        ..makefunc<Sprite>("sprite", "Sprite", "_sprite", "_Sprite"),
                 ];
             Func<Entity, Sprite>? second = null;
             foreach (var v in sprites)
@@ -133,17 +140,43 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     break;
                 }
             }
-            if (second is null || first is null)
+
+            if (second is not null)
             {
-                return null;
-            }
-            return e =>
-            {
-                if (first(e))
+                return e =>
                 {
-                    ReplaceSprite(second(e));
+                    if (first(e))
+                    {
+                        ReplaceSprite(second(e));
+                    }
+                };
+            }
+
+            Func<Entity, Func<Entity, Image>?>[] images =
+                [
+                    ..makefunc<Image>("image"),
+                ];
+            Func<Entity, Image>? third = null;
+            foreach (var v in images)
+            {
+                third = test(v(sample));
+                if (third is not null)
+                {
+                    break;
                 }
-            };
+            }
+
+            if (third is not null)
+            {
+                return e =>
+                {
+                    if (first(e))
+                    {
+                        ReplaceImage(third(e));
+                    }
+                };
+            }
+            return null;
         }
         public static void CheckAndReplaceSprite(Entity e)
         {
@@ -247,25 +280,30 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 //should throw nullptr exception
             }
         }
+        static ConditionalWeakTable<Dictionary<string, Sprite.Animation>, Dictionary<string, Sprite.Animation>>
+            OneUseSprite = [];
         public static void ReplaceSprite(Sprite sprite)
         {
-            //this would not be cloned by SpriteBank.Create
-            sprite.animations =
-            sprite.animations.Select(x => (x.Key, Value: new Sprite.Animation()
+            if (!OneUseSprite.TryGetValue(sprite.animations, out var tar))
             {
-                Delay = x.Value.Delay,
-                Frames = [.. x.Value.Frames],
-                Goto = x.Value.Goto,
-            })).ToDictionary(x => x.Key, x => x.Value);
-            sprite.currentAnimation = sprite.animations[sprite.CurrentAnimationID];
-            foreach (var anim in sprite.Animations.Values)
-            {
-                for (var i = 0; i < anim.Frames.Length; i++)
+                tar = sprite.animations.ToDictionary(x => x.Key, x => new Sprite.Animation()
                 {
-                    ref var frame = ref anim.Frames[i];
-                    frame = ImageRecolor.GetImage(frame);
+                    Delay = x.Value.Delay,
+                    Frames = [.. x.Value.Frames],
+                    Goto = x.Value.Goto,
+                });
+                OneUseSprite.AddOrUpdate(sprite.animations, tar);
+                foreach (var anim in tar.Values)
+                {
+                    for (var i = 0; i < anim.Frames.Length; i++)
+                    {
+                        ref var frame = ref anim.Frames[i];
+                        frame = ImageRecolor.GetImage(frame);
+                    }
                 }
             }
+            sprite.animations = tar;
+            sprite.currentAnimation = sprite.animations[sprite.CurrentAnimationID];
             ReplaceImage(sprite);
         }
         public static void ReplaceImage(Entity e)

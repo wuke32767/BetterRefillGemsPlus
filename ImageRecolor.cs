@@ -141,10 +141,11 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     Atlas = mtex.Atlas,
                     AtlasPath = mtex.AtlasPath,
                     Center = mtex.Center,
-                    //BottomUV=mtex.BottomUV,
                     DrawOffset = mtex.DrawOffset,
-                    //LeftUV=mtex.LeftUV,
+                    ScaleFix = mtex.ScaleFix,
 
+                    Width = mtex.Width,
+                    Height = mtex.Height,
                 };
 
             }
