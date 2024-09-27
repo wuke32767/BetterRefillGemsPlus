@@ -1,9 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Monocle;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Celeste.Mod.BetterRefillGemsPlus
@@ -11,8 +12,9 @@ namespace Celeste.Mod.BetterRefillGemsPlus
     public static class ImageRecolor
     {
         static int unique = 0;
-        static Dictionary<(Atlas, string), Task<MTexture>> result = [];
-        static Dictionary<(Atlas, string), MTexture> resultcomplete = [];
+        static Dictionary<(Atlas atlas, string path), Task<MTexture>> result = [];
+        static Dictionary<(Atlas atlas, string path), MTexture> resultcomplete = [];
+        [Obsolete]
         public static MTexture MTextureDrawOutline(MTexture mtex)
         {
             VirtualTexture? nvtex = null;
@@ -22,7 +24,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 var rect = mtex.ClipRect;
                 var fmt = orig.Format;
                 //var sin = stackalloc byte[16];
-                BetterRefillGemsPlusModule.loadimmediately.TryAdd(Environment.CurrentManagedThreadId, null);
+                //BetterRefillGemsPlusModule.loadimmediately.TryAdd(Environment.CurrentManagedThreadId, null);
                 nvtex = new VirtualTexture(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), rect.Width, rect.Height, Color.Transparent);
                 bool outrange(int v1, int v2)
                 {
@@ -157,44 +159,133 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             }
             finally
             {
-                BetterRefillGemsPlusModule.loadimmediately.TryRemove(Environment.CurrentManagedThreadId, out _);
+                //BetterRefillGemsPlusModule.loadimmediately.TryRemove(Environment.CurrentManagedThreadId, out _);
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MTexture[] MTextureDrawOutlineBatch(IEnumerable<MTexture> mtex, bool samesize)
+        {
+            VirtualTexture? nvtex = null;
+            RenderTarget2D? newtex = null;
+            try
+            {
+                //var rect = mtex.First().ClipRect;
+                //int width = rect.Width;
+                //int height = rect.Height;
+                int maxWidth;
+                int totalHeight;
+                //if (!samesize)
+                //{
+                maxWidth = mtex.Select(x => x.ClipRect.Width).Max();
+                totalHeight = mtex.Select(y => y.ClipRect.Height).Sum();
+                //}
 
-        public static Task<MTexture>? MarkResourceImageAsync(string s, Atlas atlas = null)
-        {
-            if (!result.ContainsKey((atlas, s)) && !resultcomplete.ContainsKey((atlas, s)))
-            {
-                var task = Task.Run(() => MTextureDrawOutline(atlas[s]));
-                result[(atlas, s)] = task;
-                return task;
-            }
-            return null;
-        }
-        public static MTexture MarkResourceImage(string s, Atlas atlas = null)
-        {
-            atlas ??= GFX.Game;
-            return MTextureDrawOutline(atlas[s]);
-        }
-        public static void MarkResourceSpriteAsync(string s, Atlas atlas = null, params string[] path)
-        {
-            if (path.Length == 0)
-            {
-                path = [""];
-            }
-            atlas ??= GFX.Game;
-            foreach (var u in path)
-            {
-                foreach (var v in atlas.GetAtlasSubtextures(s + u))
+                nvtex = new(Environment.CurrentManagedThreadId.ToString() + nameof(BetterRefillGemsPlus) + (++unique).ToString(), 1, 1, Color.Transparent);
+                newtex = new(Engine.Instance.GraphicsDevice, maxWidth, totalHeight);
+
+                _ = nvtex.Texture_Safe;
+                nvtex.Texture_Safe = newtex;
+                nvtex.Width = maxWidth;
+                nvtex.Height = totalHeight;
+
+                Engine.Instance.GraphicsDevice.SetRenderTarget(newtex);
+                var full = new MTexture(nvtex);
+
+                Effect outlineEffect = BetterRefillGemsPlusModule.Instance.Outline;
+
+                EffectParameter effectParameter = outlineEffect.Parameters["size"];
+                //effectParameter.SetValue(new Vector2(width, height));
+
+                List<MTexture> result = [];
+
+
+                Draw.SpriteBatch.Begin(
+                    samesize ? SpriteSortMode.Deferred : SpriteSortMode.Immediate,
+                    BlendState.Opaque,
+                    SamplerState.PointClamp,
+                    DepthStencilState.Default,
+                    RasterizerState.CullNone,
+                    outlineEffect);
+                try
                 {
-                    if (!result.ContainsKey((atlas, s)) && !resultcomplete.ContainsKey((atlas, s)))
+                    int i = 0;
+                    foreach (var tex in mtex)
                     {
-                        var task = Task.Run(() => MTextureDrawOutline(atlas[s]));
-                        result[(atlas, s)] = task;
+                        int h = tex.ClipRect.Height;
+                        var tex_safe = tex.Texture.Texture_Safe;
+                        //if (!samesize)
+                        {
+                            effectParameter.SetValue(new Vector2(tex_safe.Width, tex_safe.Height));
+                        }
+                        Draw.SpriteBatch.Draw(tex.Texture.Texture_Safe, new Vector2(0, i), tex.ClipRect, BetterRefillGemsPlusModule.Settings.OutlineColor);
+                        var m = new MTexture(full, new Rectangle(0, i, tex.ClipRect.Width, tex.ClipRect.Height))
+                        {
+                            Atlas = tex.Atlas,
+                            AtlasPath = tex.AtlasPath,
+                            Center = tex.Center,
+                            DrawOffset = tex.DrawOffset,
+                            ScaleFix = tex.ScaleFix,
+
+                            Width = tex.Width,
+                            Height = tex.Height,
+                        };
+                        result.Add(m);
+
+                        i += h;
                     }
                 }
+                finally
+                {
+                    try
+                    {
+                        Draw.SpriteBatch.End();
+                    }
+                    catch { }
+                }
+
+                return result.ToArray();
+
             }
+            catch (Exception ex)
+            {
+                nvtex?.Dispose();
+                newtex?.Dispose();
+                Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"Something went wrong when trying to create {mtex.First().Atlas.DataPath} {mtex.First().AtlasPath} .\nException: {ex.Message}\n{ex.StackTrace}"); ;
+                return mtex.ToArray();
+            }
+        }
+        public static MTexture DrawOutlineSingle(string s, Atlas atlas = null)
+        {
+            atlas ??= GFX.Game;
+            return MTextureDrawOutlineBatch([atlas[s]],false)[0];
+        }
+
+        public static MTexture[] GetImageList(IEnumerable<MTexture> mtex)
+        {
+            List<MTexture> result=[];
+            foreach(var from in mtex)
+            {
+                if(resultcomplete.TryGetValue((from.Atlas, from.AtlasPath), out var mTexture))
+                {
+                    result.Add(mTexture);
+                }
+                else
+                {
+                    var size = mtex.Select(x =>
+                    {
+                        var rect = x.Texture.Texture_Safe.Bounds;
+                        return new Vector2(rect.Width, rect.Height);
+                    });
+                    var ret = MTextureDrawOutlineBatch(mtex, size.All(x => x == size.First()));
+                    foreach (var (from2, to) in mtex.Zip(ret))
+                    {
+                        resultcomplete[(from2.Atlas, from2.AtlasPath)] = to;
+                    }
+                    return ret;
+                }
+            }
+            return result.ToArray();
         }
 
         public static MTexture GetImage(MTexture mtex)
@@ -203,16 +294,11 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         }
         public static MTexture GetImage(Atlas atlas, string v)
         {
-            if (result.Remove((atlas, v), out var task))
-            {
-                task.Wait();
-                return resultcomplete[(atlas, v)] = task.Result;
-            }
             if (resultcomplete.TryGetValue((atlas, v), out var res))
             {
                 return res;
             }
-            return resultcomplete[(atlas, v)] = MarkResourceImage(v, atlas);
+            return resultcomplete[(atlas, v)] = DrawOutlineSingle(v, atlas);
         }
     }
 }

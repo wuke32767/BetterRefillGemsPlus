@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using static Celeste.Mod.BetterRefillGemsPlus.Internalop;
 using static Celeste.Mod.BetterRefillGemsPlus.Interop;
 
@@ -280,7 +278,9 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 //should throw nullptr exception
             }
         }
-        static ConditionalWeakTable<Dictionary<string, Sprite.Animation>, Dictionary<string, Sprite.Animation>>
+        static ConditionalWeakTable<
+            Dictionary<string, Sprite.Animation>,
+            Dictionary<string, Sprite.Animation>>
             OneUseSprite = [];
         public static void ReplaceSprite(Sprite sprite)
         {
@@ -295,15 +295,18 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 OneUseSprite.AddOrUpdate(sprite.animations, tar);
                 foreach (var anim in tar.Values)
                 {
-                    for (var i = 0; i < anim.Frames.Length; i++)
-                    {
-                        ref var frame = ref anim.Frames[i];
-                        frame = ImageRecolor.GetImage(frame);
-                    }
+                    anim.Frames = ImageRecolor.GetImageList(anim.Frames);
+                    //for (var i = 0; i < anim.Frames.Length; i++)
+                    //{
+                    //    ref var frame = ref anim.Frames[i];
+                    //    frame = ImageRecolor.GetImage(frame);
+                    //}
                 }
             }
             sprite.animations = tar;
             sprite.currentAnimation = sprite.animations[sprite.CurrentAnimationID];
+
+            //however, Sprite.[base].Texture is not updated
             ReplaceImage(sprite);
         }
         public static void ReplaceImage(Entity e)

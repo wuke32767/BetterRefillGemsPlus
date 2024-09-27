@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Monocle;
 using MonoMod.Cil;
 using MonoMod.ModInterop;
@@ -18,6 +19,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
 {
     public class BetterRefillGemsPlusModule : EverestModule
     {
+        public Effect Outline;
         public static BetterRefillGemsPlusModule Instance { get; private set; }
         public static object debug_slot_1;
         public static object debug_slot_2;
@@ -31,7 +33,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         public override void PrepareMapDataProcessors(MapDataFixup context)
         {
             base.PrepareMapDataProcessors(context);
-            context.Add(new PrepareImageMapDataProcessor());
+            //context.Add(new PrepareImageMapDataProcessor());
         }
         public BetterRefillGemsPlusModule()
         {
@@ -48,6 +50,9 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             base.LoadContent(firstLoad);
             EntityImageHandler.LoadContent();
+
+            Outline = new(Engine.Graphics.GraphicsDevice, Everest.Content.Get($"BetterRefillGemsPlus:/Effects/BetterRefillGemsPlus/shader.fxb").Data);
+            Outline.CurrentTechnique = Outline.Techniques[true ? "InnerOutline" : "OuterOutline"];
         }
 
 
@@ -59,15 +64,15 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             var load = typeof(VirtualTexture).GetProperty("LoadImmediately", ReflectionHandler.bf)!.GetMethod;
             if (load != null)
             {
-                VTex_LoadImm = new Hook(load, (Func<VirtualTexture, bool> orig, VirtualTexture self) =>
-                {
-                    var r = orig(self);
-                    if (GetProcess())
-                    {
-                        return true;
-                    }
-                    return r;
-                });
+                //VTex_LoadImm = new Hook(load, (Func<VirtualTexture, bool> orig, VirtualTexture self) =>
+                //{
+                //    var r = orig(self);
+                //    if (GetProcess())
+                //    {
+                //        return true;
+                //    }
+                //    return r;
+                //});
             }
             EntityImageHandler.Load();
             typeof(Interop).ModInterop();
@@ -75,7 +80,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         Hook? VTex_LoadImm;
         //should be safe if it's applied for multiple times.
         private void VirtualTexture_Load(ILContext il)
-        {
+        { 
             var ic = new ILCursor(il);
             if (ic.TryGotoNext(MoveType.After,
                 i => i.MatchLdarg(0),
@@ -92,9 +97,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool GetProcess()
         {
-            return loadimmediately.ContainsKey(Environment.CurrentManagedThreadId);
+            //return loadimmediately.ContainsKey(Environment.CurrentManagedThreadId);
+            return false;
         }
-        internal static ConcurrentDictionary<int, object?> loadimmediately = [];
+        //internal static ConcurrentDictionary<int, object?> loadimmediately = [];
 
         private void Entity_Awake(On.Monocle.Entity.orig_Awake orig, Entity self, Scene scene)
         {

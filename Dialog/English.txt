@@ -1,0 +1,4 @@
+BetterRefillGemsPlus_Setting_Color= Outline Color
+BetterRefillGemsPlus_Setting_Color_Speed= Press JournalKey to Speed Up, Requires Reboot To Completely Apply 
+
+
