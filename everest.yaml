@@ -1,5 +1,5 @@
 - Name: BetterRefillGemsPlus
-  Version: 0.1.4
+  Version: 0.3.0
   DLL: bin/BetterRefillGemsPlus.dll
   Dependencies:
     - Name: Everest
