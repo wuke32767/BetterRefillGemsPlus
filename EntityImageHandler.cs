@@ -278,6 +278,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 //should throw nullptr exception
             }
         }
+        public static void Clear()
+        {
+            OneUseSprite.Clear();
+        }
         static ConditionalWeakTable<
             Dictionary<string, Sprite.Animation>,
             Dictionary<string, Sprite.Animation>>

@@ -159,31 +159,37 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 Change(v =>
                 {
                     var i = getter();
-                    i.R = (byte)v;
+                    i = masker(i, (byte)v);
                     setter(i);
+                    EntityImageHandler.Clear();
+                    ImageRecolor.Clear();
                 });
             }
         }
         public void CreateOutlineColorEntry(TextMenu textMenu, bool inGame)
         {
-            textMenu.Add(new TextMenu.SubHeader(Dialog.Clean("BetterRefillGemsPlus_Setting_Color_Speed"), false));
+            if(inGame)
+            {
+                return;
+            }
             var sub = new Colored(Dialog.Clean("BetterRefillGemsPlus_Setting_Color"), false, () => OutlineColor);
+            sub.Add(new TextMenu.SubHeader(Dialog.Clean("BetterRefillGemsPlus_Setting_Color_Speed"), false));
             textMenu.Add(sub);
             sub.Add(new SubColored("R", (a, v) =>
             {
                 a.R = v;
                 return a;
-            }, () => OutlineColor, v => OutlineColor = v));
+            }, () => OutlineColor, v => OutlineColor = v,OutlineColor.R));
             sub.Add(new SubColored("G", (a, v) =>
             {
                 a.G = v;
                 return a;
-            }, () => OutlineColor, v => OutlineColor = v));
+            }, () => OutlineColor, v => OutlineColor = v,OutlineColor.G));
             sub.Add(new SubColored("B", (a, v) =>
             {
                 a.B = v;
                 return a;
-            }, () => OutlineColor, v => OutlineColor = v));
+            }, () => OutlineColor, v => OutlineColor = v,OutlineColor.B));
             //sub = new Colored(Dialog.Clean("BetterRefillGemsPlus_Setting_Color_A"), false, () => OutlineColor);
             //textMenu.Add(sub);
             //sub.Add(new SubColored("A", (a, v) =>

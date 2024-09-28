@@ -114,6 +114,8 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             //IL.Monocle.VirtualTexture.Load -= VirtualTexture_Load;
             VTex_LoadImm?.Dispose();
             // TODO: unapply any hooks applied in Load()
+            EntityImageHandler.Clear();
+            ImageRecolor.Clear();
         }
     }
 }
