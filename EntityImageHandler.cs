@@ -150,10 +150,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 };
             }
 
-            Func<Entity, Func<Entity, Image>?>[] images =
-                [
-                    ..makefunc<Image>("image"),
-                ];
+            IEnumerable<Func<Entity, Func<Entity, Image>?>> images = makefunc<Image>("image");
             Func<Entity, Image>? third = null;
             foreach (var v in images)
             {
@@ -194,11 +191,15 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                     }
                 }
             }
-            if (!CheckedType.Add(ety))
+            if (CheckedType.Add(ety))
             {
-                return;
+                ProcessType(e);
             }
-            bool flag = Registered.Remove(ety, out func);
+        }
+        static void ProcessType(Entity e)
+        {
+            Type ety = e.GetType();
+            bool flag = Registered.Remove(ety, out var func);
             //still try to clear other matched result
             flag = RegisteredRefl.Remove(ety.FullName!, out var func2) || flag;
 
@@ -310,6 +311,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             sprite.animations = tar;
             sprite.currentAnimation = sprite.animations[sprite.CurrentAnimationID];
 
+            // hi procedurline
+            // dup in ReplaceImage
+            //make_procedurline_happy(sprite);
+
             //however, Sprite.[base].Texture is not updated
             ReplaceImage(sprite);
         }
@@ -334,9 +339,18 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         }
         public static void ReplaceImage(Image Image)
         {
+            procedurline_reload(Image);
+
             ref var frame = ref Image.Texture;
             frame = ImageRecolor.GetImage(frame);
         }
 
+        private static void procedurline_reload(Image img)
+        {
+            var e = img.Entity;
+            e.Remove(img);
+            //ProcedurlineModule.SpriteManager.
+            e.Add(img);
+        }
     }
 }

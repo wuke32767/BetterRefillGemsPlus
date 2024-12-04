@@ -2,12 +2,15 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;
 using System;
+using System.Collections.Generic;
 namespace Celeste.Mod.BetterRefillGemsPlus
 {
     public class BetterRefillGemsPlusModuleSettings : EverestModuleSettings
     {
         bool _inner = true;
         public Color OutlineColor { get; set; } = new(255, 41, 41, 255);
+
+        //public List<string> Registered { get; set; }=[];
         //public enum Alpha
         //{
         //    Ignore, Outline, Whole,
@@ -198,5 +201,19 @@ namespace Celeste.Mod.BetterRefillGemsPlus
             //    return a;
             //}, () => OutlineColor, v => OutlineColor = v));
         }
+
+        //public void CreateRegisteredEntry(TextMenu textMenu, bool inGame)
+        //{
+        //    if(inGame)
+        //    {
+        //        return;
+        //    }
+        //    var button = new TextMenu.Button(Dialog.Clean("BetterRefillGemsPlus_Setting_Type"));
+        //    textMenu.Add(button);
+        //    button.OnPressed=()=>
+        //    {
+
+        //    };
+        //}
     }
 }
