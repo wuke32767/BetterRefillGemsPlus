@@ -74,8 +74,8 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 }
                 void calcBigEndian(byte[] sin, byte[] transparent)
                 {
-                    sin = sin.Reverse().ToArray();
-                    transparent = transparent.Reverse().ToArray();
+                    sin.Reverse();
+                    transparent.Reverse();
                     var size = sin.Length;
                     byte[] b = new byte[size * rect.Width * rect.Height];
                     orig.GetData(0, rect, b, 0, b.Length);
@@ -182,6 +182,7 @@ namespace Celeste.Mod.BetterRefillGemsPlus
         {
             DynamicVirtualTexture? nvtex = null;
             RenderTarget2D? newtex = null;
+            var previousRenderTarget = Engine.Instance.GraphicsDevice.GetRenderTargets();
             try
             {
                 //var rect = mtex.First().ClipRect;
@@ -269,6 +270,10 @@ namespace Celeste.Mod.BetterRefillGemsPlus
                 newtex?.Dispose();
                 Logger.Log(LogLevel.Error, nameof(BetterRefillGemsPlus), $"Something went wrong when trying to create {mtex.First().Atlas.DataPath} {mtex.First().AtlasPath} .\nException: {ex.Message}\n{ex.StackTrace}"); ;
                 return mtex.ToArray();
+            }
+            finally
+            {
+                Engine.Graphics.GraphicsDevice.SetRenderTargets(previousRenderTarget);
             }
         }
         public static MTexture DrawOutlineSingle(string s, Atlas atlas = null)
